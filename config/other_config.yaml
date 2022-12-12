@@ -1,0 +1,17 @@
+map_width: 10
+map_height: 15
+starting_foliage: 20
+energy_gain: 20
+daily_foliage_growth: 5
+starting_animals: 4
+starting_energy: 100
+min_procreation_energy: 65
+procreation_energy_loss: 50
+min_mutations: 4
+max_mutations: 12
+genome_length: 24
+
+map_variant: portal
+foliage_variant: toxic
+mutation_variant: step
+behaviour_variant: crazy
