@@ -117,4 +117,6 @@ public class Genotype {
         }
         return dir;
     }
+
+    public final int getNextGeneIndex() { return nextGeneIndex; }
 }

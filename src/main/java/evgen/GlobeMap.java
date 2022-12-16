@@ -9,7 +9,9 @@ public class GlobeMap extends AbstractWorldMap {
 
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition) {}
 
-    public Pair<Vector2d, MapDirection> attemptMove(Vector2d fromPos, MapDirection fromDir) {
+    public Pair<Vector2d, MapDirection> attemptMove(Animal a) {
+        final Vector2d fromPos = a.getPosition();
+        final MapDirection fromDir = a.getFacing();
         // Leaving map to the north/south -- stay in place, change direction
         if ((fromPos.y == boundaryLowerLeft.y  && (fromDir == MapDirection.SOUTH || fromDir == MapDirection.SOUTHEAST || fromDir == MapDirection.SOUTHWEST)) ||
             (fromPos.y == boundaryUpperRight.y && (fromDir == MapDirection.NORTH || fromDir == MapDirection.NORTHEAST || fromDir == MapDirection.NORTHWEST))) {

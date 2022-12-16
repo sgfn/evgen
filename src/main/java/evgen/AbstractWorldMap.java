@@ -38,8 +38,17 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         } else {
             SortedSet<Animal> s = new TreeSet<Animal>(new Comparator<Animal>() {
                 public final int compare(Animal first, Animal second) {
-                    // TODO: implement comparator - sort by: energy desc, age desc, children desc, id
-                    return 0;
+                    int res = first.getEnergy() - second.getEnergy();
+                    if (res == 0) {
+                        res = first.getAge() - second.getAge();
+                    }
+                    if (res == 0) {
+                        res = first.getChildren() - second.getChildren();
+                    }
+                    if (res == 0) {
+                        res = first.id - second.id;
+                    }
+                    return res;
                 }
             });
             s.add(animal);
@@ -71,7 +80,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         return false;
     }
 
-    // TODO: implement removing animals from map at their death
+    // TODO: implement removing animals from map at their death -- will probably be handled by simulation engine
 
     @Override
     public boolean isOccupied(Vector2d position) {
@@ -92,21 +101,14 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         return mapVis.draw(boundaryLowerLeft, boundaryUpperRight);
     }
 
-    // Do not mark as throws -- it should never throw anything, if it does,
-    // something's gone terribly wrong and we need to stop the entire thing anyway
     @Override
     public void positionChanged(int entityID, Vector2d oldPosition, Vector2d newPosition) {
-        Animal a = animalsByID.get(entityID);
-        if (a == null) {
-            throw new RuntimeException(String.format("Animal with id %d does not exist", entityID));
-        }
+        final Animal a = animalsByID.get(entityID);
+        assert a != null : String.format("Animal with id %d does not exist", entityID);
         SortedSet<Animal> s = animals.get(oldPosition);
-        if (s == null) {
-            throw new RuntimeException(String.format("positionChanged invoked from pos %s but no animals are present there!", oldPosition));
-        }
-        if (!s.remove(a)) {
-            throw new RuntimeException(String.format("Animal with id %d is not present at pos %s", entityID, oldPosition));
-        }
+        assert s != null : String.format("positionChanged invoked from pos %s but no animals are present there!", oldPosition);
+        boolean rc = s.remove(a);
+        assert rc : String.format("Animal with id %d is not present at pos %s", entityID, oldPosition);
         addAnimalToMap(newPosition, a);
     }
 
@@ -122,5 +124,5 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         return nextAnimalID++;
     }
 
-    public abstract Pair<Vector2d, MapDirection> attemptMove(Vector2d fromPos, MapDirection fromDir);
+    public abstract Pair<Vector2d, MapDirection> attemptMove(Animal a);
 }
