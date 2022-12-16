@@ -1,6 +1,12 @@
 package evgen;
 
+import java.util.Random;
+
 public class World {
+    // XXX: Consider adding the ability to set a seed for the RNG
+    public static final Random rng = new Random();
+    public static final Settings settings = new Settings();
+
     public static void printCurrent(IWorldMap m, Animal a) {
         System.out.println(String.format("Animal at pos %s, facing %s", a.getPosition(), a.getFacing()));
         System.out.println(String.format("GENES: %s (next at index %d)", a.genes, a.genes.getNextGeneIndex()));
@@ -8,12 +14,17 @@ public class World {
     }
 
     public static void main(String[] args) {
-        Settings s = new Settings("config/sample_config.yaml");
-        IWorldMap m = new GlobeMap(s);
-        Animal a = new Animal(s, m, new Vector2d(3, 5));
-        m.place(a);
         System.out.println("evgen");
+
+        final String configPath = "config/sample_config.yaml";
+        boolean rc = settings.loadConfig(configPath);
+        System.out.println(String.format("Load config file `%s': %s", configPath, rc ? "successful" : "failed!"));
+
+        IWorldMap m = new GlobeMap();
+        Animal a = new Animal(m, new Vector2d(3, 5));
+        m.place(a);
         printCurrent(m, a);
+
         for (int i=0; i<5; ++i) {
             System.out.println(String.format("MOVE %d", i));
             a.move();

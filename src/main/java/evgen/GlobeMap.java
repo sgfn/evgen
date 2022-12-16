@@ -3,10 +3,6 @@ package evgen;
 import org.javatuples.Pair;
 
 public class GlobeMap extends AbstractWorldMap {
-    public GlobeMap(Settings s) {
-        super(s.getMapWidth(), s.getMapHeight());
-    }
-
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition) {}
 
     public Pair<Vector2d, MapDirection> attemptMove(Animal a) {

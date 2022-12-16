@@ -1,23 +1,8 @@
 package evgen;
 
-import java.util.Random;
-
 import org.javatuples.Pair;
 
 public class PortalMap extends AbstractWorldMap {
-    private final Random rng;
-
-    public PortalMap(Settings s, long seed) {
-        super(s.getMapWidth(), s.getMapHeight());
-        rng = new Random(seed);
-    }
-
-    public PortalMap(Settings s) {
-        super(s.getMapWidth(), s.getMapHeight());
-        rng = new Random();
-    }
-
-
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition) {}
 
     public Pair<Vector2d, MapDirection> attemptMove(Animal a) {
@@ -28,11 +13,12 @@ public class PortalMap extends AbstractWorldMap {
             (fromPos.y == boundaryUpperRight.y && (fromDir == MapDirection.NORTH || fromDir == MapDirection.NORTHEAST || fromDir == MapDirection.NORTHWEST)) ||
             (fromPos.x == boundaryLowerLeft.x  && (fromDir == MapDirection.WEST  || fromDir == MapDirection.NORTHWEST || fromDir == MapDirection.SOUTHWEST)) ||
             (fromPos.x == boundaryUpperRight.x && (fromDir == MapDirection.EAST  || fromDir == MapDirection.NORTHEAST || fromDir == MapDirection.SOUTHEAST))) {
+            // Hellish portal hurts
             a.loseEnergy();
             return new Pair<>(
-                new Vector2d(rng.nextInt(boundaryLowerLeft.x, boundaryUpperRight.x),
-                             rng.nextInt(boundaryLowerLeft.y, boundaryUpperRight.y)),
-                MapDirection.intToDir[rng.nextInt(8)]
+                new Vector2d(World.rng.nextInt(boundaryLowerLeft.x, boundaryUpperRight.x),
+                             World.rng.nextInt(boundaryLowerLeft.y, boundaryUpperRight.y)),
+                MapDirection.intToDir[World.rng.nextInt(8)]
             );
         }
         // Regular behaviour

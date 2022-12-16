@@ -46,41 +46,8 @@ public class Settings {
     // meta
     private boolean loadSuccessful;
 
-    public Settings() {
-        loadSuccessful = false;
-        restoreDefaults();
-    }
-
-    public Settings(String configPath) {
-        // Load defaults, overwrite with config, then restore defaults if anything went wrong
-        restoreDefaults();
-        loadSuccessful = loadConfig(configPath);
-        if (!loadSuccessful) {
-            restoreDefaults();
-        }
-    }
-
-    public void restoreDefaults() {
-        // TODO: find sensible default values
-        mapWidth = 20;
-        mapHeight = 10;
-        startingFoliage = 5;
-        energyGain = 5;
-        dailyFoliageGrowth = 2;
-        startingAnimals = 2;
-        startingEnergy = 30;
-        minProcreationEnergy = 15;
-        procreationEnergyLoss = 10;
-        minMutations = 0;
-        maxMutations = 5;
-        genomeLength = 32;
-        mapType = MapType.GLOBE;
-        foliageGrowthType = FoliageGrowthType.EQUATOR;
-        mutationType = MutationType.RANDOM;
-        behaviourType = BehaviourType.PREDESTINED;
-    }
-
-    public boolean loadConfig(String configPath) {
+    // PRIVATE METHODS
+    private boolean loadConfigInternal(String configPath) {
         InputStream inputStream;
         try {
             inputStream = new FileInputStream(new File(configPath));
@@ -174,6 +141,46 @@ public class Settings {
         }
 
         return true;
+    }
+
+    public Settings() {
+        loadSuccessful = false;
+        restoreDefaults();
+    }
+
+    public Settings(String configPath) {
+        loadConfig(configPath);
+    }
+
+    public void restoreDefaults() {
+        // TODO: find sensible default values
+        mapWidth = 20;
+        mapHeight = 10;
+        startingFoliage = 5;
+        energyGain = 5;
+        dailyFoliageGrowth = 2;
+        startingAnimals = 2;
+        startingEnergy = 30;
+        minProcreationEnergy = 15;
+        procreationEnergyLoss = 10;
+        minMutations = 0;
+        maxMutations = 5;
+        genomeLength = 32;
+        mapType = MapType.GLOBE;
+        foliageGrowthType = FoliageGrowthType.EQUATOR;
+        mutationType = MutationType.RANDOM;
+        behaviourType = BehaviourType.PREDESTINED;
+    }
+
+    // XXX: When loading new config, make sure we recreate the entire thing
+    public boolean loadConfig(String configPath) {
+        // Load defaults, overwrite with config, then restore defaults if anything went wrong
+        restoreDefaults();
+        loadSuccessful = loadConfigInternal(configPath);
+        if (!loadSuccessful) {
+            restoreDefaults();
+        }
+        return loadSuccessful;
     }
 
     // GETTERS

@@ -2,16 +2,13 @@ package evgen;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 import org.javatuples.Pair;
 
 public class Animal extends AbstractWorldMapElement {
     // PRIVATE ATTRIBUTES
-    private final Random rng;
     private final IWorldMap map;
-    private final Settings settings;
-    
+
     private MapDirection facing;
     private int energy;
     private int age = 0;
@@ -30,31 +27,29 @@ public class Animal extends AbstractWorldMapElement {
     }
 
     // PUBLIC METHODS
-    public Animal(Settings s, IWorldMap m, Vector2d p, Genotype g, int e) {
-        settings = s;
+    public Animal(IWorldMap m, Vector2d p, Genotype g, int e) {
         map = m;
         pos = p;
-        rng = new Random();
         id = map.getNextAnimalID();
-        facing = MapDirection.fromInt(rng.nextInt(8));
+        facing = MapDirection.fromInt(World.rng.nextInt(8));
         energy = e;
         genes = g;
     }
 
-    public Animal(Settings s, IWorldMap m, Vector2d p, Genotype g) {
-        this(s, m, p, g, s.getStartingEnergy());
+    public Animal(IWorldMap m, Vector2d p, Genotype g) {
+        this(m, p, g, World.settings.getStartingEnergy());
     }
 
-    public Animal(Settings s, IWorldMap m, Vector2d p) {
-        this(s, m, p, new Genotype(s));
+    public Animal(IWorldMap m, Vector2d p) {
+        this(m, p, new Genotype());
     }
 
     public void eat() {
-        energy += settings.getEnergyGain();
+        energy += World.settings.getEnergyGain();
     }
 
     public void loseEnergy() {
-        energy -= settings.getProcreationEnergyLoss();
+        energy -= World.settings.getProcreationEnergyLoss();
     }
 
     /**
@@ -82,7 +77,7 @@ public class Animal extends AbstractWorldMapElement {
     }
 
     public boolean canProcreate() {
-        return energy >= settings.getMinProcreationEnergy();
+        return energy >= World.settings.getMinProcreationEnergy();
     }
 
     /**
@@ -94,12 +89,12 @@ public class Animal extends AbstractWorldMapElement {
     public Animal procreate(Animal other) {
         final double ratio = this.energy / (this.energy + other.energy);
         Genotype childGenes = new Genotype(this.genes, other.genes, ratio);
-        final int energyLoss = settings.getProcreationEnergyLoss();
+        final int energyLoss = World.settings.getProcreationEnergyLoss();
         energy -= energyLoss;
         other.energy -= energyLoss;
         ++this.children;
         ++other.children;
-        return new Animal(settings, map, pos, childGenes, 2*energyLoss);
+        return new Animal(map, pos, childGenes, 2*energyLoss);
     }
 
     public final MapDirection getFacing() { return facing; }

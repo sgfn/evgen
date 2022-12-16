@@ -32,6 +32,10 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         boundaryUpperRight = new Vector2d(width-1, height-1);
     }
 
+    protected AbstractWorldMap() {
+        this(World.settings.getMapWidth(), World.settings.getMapHeight());
+    }
+
     protected void addAnimalToMap(Vector2d pos, Animal animal) {
         if (animals.containsKey(pos)) {
             animals.get(pos).add(animal);
