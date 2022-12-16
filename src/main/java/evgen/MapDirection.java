@@ -14,6 +14,10 @@ public enum MapDirection {
         NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST
     };
 
+    public static MapDirection fromInt(int dir) {
+        return intToDir[dir];
+    }
+
     public final int facing;
 
     MapDirection(int f) {
@@ -21,17 +25,16 @@ public enum MapDirection {
     }
 
     public Vector2d toUnitVector() {
-        switch(this) {
-            case NORTH:     return new Vector2d(0, 1);
-            case NORTHEAST: return new Vector2d(1, 1);
-            case EAST:      return new Vector2d(1, 0);
-            case SOUTHEAST: return new Vector2d(1, -1);
-            case SOUTH:     return new Vector2d(0, -1);
-            case SOUTHWEST: return new Vector2d(-1, -1);
-            case WEST:      return new Vector2d(-1, 0);
-            case NORTHWEST: return new Vector2d(-1, 1);
-            default:        return null;
-        }
+        return switch(this) {
+            case NORTH     -> new Vector2d(0, 1);
+            case NORTHEAST -> new Vector2d(1, 1);
+            case EAST      -> new Vector2d(1, 0);
+            case SOUTHEAST -> new Vector2d(1, -1);
+            case SOUTH     -> new Vector2d(0, -1);
+            case SOUTHWEST -> new Vector2d(-1, -1);
+            case WEST      -> new Vector2d(-1, 0);
+            case NORTHWEST ->new Vector2d(-1, 1);
+        };
     }
 
     public MapDirection updateDirection(int diff) {
