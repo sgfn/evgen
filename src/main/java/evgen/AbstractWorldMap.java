@@ -2,8 +2,6 @@ package evgen;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -16,6 +14,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     protected final Vector2d boundaryUpperRight;
 
     protected final MapVisualizer mapVis = new MapVisualizer(this);
+    protected final IFoliageGrower foliageGen;
 
     protected int nextAnimalID = 0;
     // Can have multiple animals at same spot, but only one plant
@@ -23,17 +22,12 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     protected Map<Vector2d, SortedSet<Animal>> animals = new HashMap<>();
     protected Map<Vector2d, IMapElement> foliage = new HashMap<>();
 
-    // XXX: Do we need to be able to add observers to a map? Perhaps adding plants can be resolved in a different way?
-    protected List<IPositionChangeObserver> observers = new LinkedList<>();
-
     // PROTECTED METHODS
-    protected AbstractWorldMap(int width, int height) {
-        boundaryLowerLeft = new Vector2d(0, 0);
-        boundaryUpperRight = new Vector2d(width-1, height-1);
-    }
-
     protected AbstractWorldMap() {
-        this(World.settings.getMapWidth(), World.settings.getMapHeight());
+        boundaryLowerLeft = new Vector2d(0, 0);
+        boundaryUpperRight = new Vector2d(World.settings.getMapWidth()-1, World.settings.getMapHeight()-1);
+        foliageGen = (World.settings.getFoliageGrowthType() == Settings.FoliageGrowthType.EQUATOR) ? new EquatorialGrower(this) : new ToxicCorpsesGrower(this);
+        growFoliage(World.settings.getStartingFoliage());
     }
 
     protected void addAnimalToMap(Vector2d pos, Animal animal) {
@@ -41,6 +35,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
             animals.get(pos).add(animal);
         } else {
             SortedSet<Animal> s = new TreeSet<Animal>(new Comparator<Animal>() {
+                // TODO: make sure the animals are stored in the correct order!
                 public final int compare(Animal first, Animal second) {
                     int res = first.getEnergy() - second.getEnergy();
                     if (res == 0) {
@@ -60,9 +55,26 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         }
     }
 
-    protected void notifyObservers(Vector2d oldPos, Vector2d newPos) {
-        for (IPositionChangeObserver o : observers) {
-            o.positionChanged(oldPos, newPos);
+    protected void growFoliage(int amount) {
+        Vector2d spot;
+        for (int i = 0; i < amount; ++i) {
+            spot = foliageGen.getPlantSpot();
+            if (spot == null) {
+                return;
+            }
+            Plant p = new Plant(spot);
+            foliage.put(p.getPosition(), p);
+        }
+    }
+
+    protected void feedAnimals() {
+        // XXX: maybe rethink?
+        for (Vector2d spot : animals.keySet()) {
+            if (animals.get(spot).size() > 0 && foliage.get(spot) != null) {
+                animals.get(spot).first().eat();
+                foliage.remove(spot);
+                foliageGen.plantEaten(spot);
+            }
         }
     }
 
@@ -85,6 +97,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     }
 
     // TODO: implement removing animals from map at their death -- will probably be handled by simulation engine
+    // XXX: make sure to inform ToxicCorpsesGrower about death of animals!
 
     @Override
     public boolean isOccupied(Vector2d position) {
@@ -116,17 +129,13 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         addAnimalToMap(newPosition, a);
     }
 
-    public void addObserver(IPositionChangeObserver o) {
-        observers.add(o);
-    }
-
-    public void removeObserver(IPositionChangeObserver o) {
-        observers.remove(o);
-    }
-
     public int getNextAnimalID() {
         return nextAnimalID++;
     }
 
     public abstract Pair<Vector2d, MapDirection> attemptMove(Animal a);
+
+    public Pair<Vector2d, Vector2d> getMapBounds() {
+        return new Pair<>(boundaryLowerLeft, boundaryUpperRight);
+    }
 }
