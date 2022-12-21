@@ -5,6 +5,8 @@ import java.util.Random;
 public class World {
     // XXX: Consider adding the ability to set a seed for the RNG
     public static final Random rng = new Random();
+    // XXX: Settings object probably shouldn't be static, because we'll need multiple,
+    // XXX: one for each instance of the simulation
     public static final Settings settings = new Settings();
 
     public static void printCurrent(IWorldMap m, Animal a) {

@@ -9,4 +9,5 @@ public interface IWorldMap {
     Object objectAt(Vector2d position);
     int getNextAnimalID();
     Pair<Vector2d, MapDirection> attemptMove(Animal a);
+    Pair<Vector2d, Vector2d> getMapBounds();
 }
