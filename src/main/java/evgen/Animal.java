@@ -31,7 +31,7 @@ public class Animal extends AbstractWorldMapElement {
         map = m;
         pos = p;
         id = map.getNextAnimalID();
-        facing = MapDirection.fromInt(World.rng.nextInt(8));
+        facing = MapDirection.fromInt(World.rng.nextInt(MapDirection.directionCount));
         energy = e;
         genes = g;
     }

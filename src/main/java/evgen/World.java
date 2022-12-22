@@ -3,8 +3,8 @@ package evgen;
 import java.util.Random;
 
 public class World {
-    // XXX: Consider adding the ability to set a seed for the RNG
     public static final Random rng = new Random();
+    public static final GenotypeMutationIndexGenerator indexGen = new GenotypeMutationIndexGenerator(rng);
     // XXX: Settings object probably shouldn't be static, because we'll need multiple,
     // XXX: one for each instance of the simulation
     public static final Settings settings = new Settings();
