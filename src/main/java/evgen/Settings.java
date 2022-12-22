@@ -184,21 +184,21 @@ public class Settings {
     }
 
     // GETTERS
-    public final int getMapWidth() { return mapWidth; }
-    public final int getMapHeight() { return mapHeight; }
-    public final int getStartingFoliage() { return startingFoliage; }
-    public final int getEnergyGain() { return energyGain; }
-    public final int getDailyFoliageGrowth() { return dailyFoliageGrowth; }
-    public final int getStartingAnimals() { return startingAnimals; }
-    public final int getStartingEnergy() { return startingEnergy; }
-    public final int getMinProcreationEnergy() { return minProcreationEnergy; }
-    public final int getProcreationEnergyLoss() { return procreationEnergyLoss; }
-    public final int getMinMutations() { return minMutations; }
-    public final int getMaxMutations() { return maxMutations; }
-    public final int getGenomeLength() { return genomeLength; }
-    public final MapType getMapType() { return mapType; }
-    public final FoliageGrowthType getFoliageGrowthType() { return foliageGrowthType; }
-    public final MutationType getMutationType() { return mutationType; }
-    public final BehaviourType getBehaviourType() { return behaviourType; }
-    public final boolean success() { return loadSuccessful; }
+    public int getMapWidth() { return mapWidth; }
+    public int getMapHeight() { return mapHeight; }
+    public int getStartingFoliage() { return startingFoliage; }
+    public int getEnergyGain() { return energyGain; }
+    public int getDailyFoliageGrowth() { return dailyFoliageGrowth; }
+    public int getStartingAnimals() { return startingAnimals; }
+    public int getStartingEnergy() { return startingEnergy; }
+    public int getMinProcreationEnergy() { return minProcreationEnergy; }
+    public int getProcreationEnergyLoss() { return procreationEnergyLoss; }
+    public int getMinMutations() { return minMutations; }
+    public int getMaxMutations() { return maxMutations; }
+    public int getGenomeLength() { return genomeLength; }
+    public MapType getMapType() { return mapType; }
+    public FoliageGrowthType getFoliageGrowthType() { return foliageGrowthType; }
+    public MutationType getMutationType() { return mutationType; }
+    public BehaviourType getBehaviourType() { return behaviourType; }
+    public boolean success() { return loadSuccessful; }
 }

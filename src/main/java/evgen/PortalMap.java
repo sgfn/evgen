@@ -18,7 +18,7 @@ public class PortalMap extends AbstractWorldMap {
             return new Pair<>(
                 new Vector2d(World.rng.nextInt(boundaryLowerLeft.x, boundaryUpperRight.x),
                              World.rng.nextInt(boundaryLowerLeft.y, boundaryUpperRight.y)),
-                MapDirection.intToDir[World.rng.nextInt(8)]
+                MapDirection.fromInt(World.rng.nextInt(MapDirection.directionCount))
             );
         }
         // Regular behaviour

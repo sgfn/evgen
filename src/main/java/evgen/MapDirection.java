@@ -10,6 +10,8 @@ public enum MapDirection {
     WEST(6),
     NORTHWEST(7);
 
+    public static final int directionCount = 8;
+
     public static final MapDirection[] intToDir = new MapDirection[] {
         NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST
     };
@@ -33,12 +35,12 @@ public enum MapDirection {
             case SOUTH     -> new Vector2d(0, -1);
             case SOUTHWEST -> new Vector2d(-1, -1);
             case WEST      -> new Vector2d(-1, 0);
-            case NORTHWEST ->new Vector2d(-1, 1);
+            case NORTHWEST -> new Vector2d(-1, 1);
         };
     }
 
     public MapDirection updateDirection(int diff) {
-        return intToDir[(facing + diff) % 8];
+        return intToDir[(facing + diff) % directionCount];
     }
 
     public MapDirection updateDirection(MapDirection diffDir) {
