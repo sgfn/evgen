@@ -1,10 +1,23 @@
 package evgen;
 
+import java.util.Random;
+
 import org.javatuples.Pair;
 
 public class GlobeMap extends AbstractWorldMap {
-    public void positionChanged(Vector2d oldPosition, Vector2d newPosition) {}
+    public GlobeMap(Random r, Settings s, IFoliageGrower f) {
+        super(r, s, f);
+    }
 
+    public GlobeMap(Random r, Settings s) {
+        super(r, s);
+    }
+
+    public GlobeMap() {
+        this(World.rng, World.settings);
+    }
+
+    @Override
     public Pair<Vector2d, MapDirection> attemptMove(Animal a) {
         final Vector2d fromPos = a.getPosition();
         final MapDirection fromDir = a.getFacing();
