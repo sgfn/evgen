@@ -1,10 +1,23 @@
 package evgen;
 
+import java.util.Random;
+
 import org.javatuples.Pair;
 
 public class PortalMap extends AbstractWorldMap {
-    public void positionChanged(Vector2d oldPosition, Vector2d newPosition) {}
+    public PortalMap(Random r, Settings s, IFoliageGrower f) {
+        super(r, s, f);
+    }
 
+    public PortalMap(Random r, Settings s) {
+        super(r, s);
+    }
+
+    public PortalMap() {
+        this(World.rng, World.settings);
+    }
+
+    @Override
     public Pair<Vector2d, MapDirection> attemptMove(Animal a) {
         // Leaving map from whichever side
         final Vector2d fromPos = a.getPosition();
@@ -16,9 +29,9 @@ public class PortalMap extends AbstractWorldMap {
             // Hellish portal hurts
             a.loseEnergy();
             return new Pair<>(
-                new Vector2d(World.rng.nextInt(boundaryLowerLeft.x, boundaryUpperRight.x),
-                             World.rng.nextInt(boundaryLowerLeft.y, boundaryUpperRight.y)),
-                MapDirection.fromInt(World.rng.nextInt(MapDirection.directionCount))
+                new Vector2d(rng.nextInt(boundaryLowerLeft.x, boundaryUpperRight.x),
+                             rng.nextInt(boundaryLowerLeft.y, boundaryUpperRight.y)),
+                MapDirection.fromInt(rng.nextInt(MapDirection.directionCount))
             );
         }
         // Regular behaviour

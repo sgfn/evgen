@@ -80,8 +80,7 @@ public class Animal extends AbstractWorldMapElement {
 
     /**
      * Age an animal up at the end of an epoch -- decrement energy, increment age.
-     * @return true if animal is still alive
-     * @return false otherwise
+     * @return true if animal is still alive, false otherwise
      */
     public boolean ageUp() {
         ++age;
@@ -116,6 +115,7 @@ public class Animal extends AbstractWorldMapElement {
     public int getEnergy() { return energy; }
     public int getChildren() { return children; }
     public int getAge() { return age; }
+    public int getID() { return id; }
 
     @Override
     public String toString() {
