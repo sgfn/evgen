@@ -1,6 +1,6 @@
 package evgen;
 
-public abstract class AbstractWorldMapElement implements IMapElement {
+public abstract class AbstractMapElement implements IMapElement {
     protected Vector2d pos;
 
     @Override

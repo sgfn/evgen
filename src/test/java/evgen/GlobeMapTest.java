@@ -13,16 +13,13 @@ import org.junit.jupiter.api.Test;
 
 public class GlobeMapTest {
     private static final long rngSeed = 20010911l;
-    private static final int mockGenomeLength = 10;
     private static final Settings s = mock(Settings.class);
     private static final IFoliageGrower f = mock(EquatorialGrower.class);
 
     private Random rng;
 
     @BeforeAll
-    static void setUpOnce() {
-        when(s.getGenomeLength()).thenReturn(mockGenomeLength);
-    }
+    static void setUpOnce() {}
 
     @BeforeEach
     void setUp() {

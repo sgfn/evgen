@@ -1,6 +1,6 @@
 package evgen;
 
-public class Plant extends AbstractWorldMapElement {
+public class Plant extends AbstractMapElement {
     public Plant(Vector2d p) {
         pos = p;
     }
