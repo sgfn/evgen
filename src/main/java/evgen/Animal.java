@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.javatuples.Pair;
 
-public class Animal extends AbstractWorldMapElement {
+public class Animal extends AbstractMapElement {
     // PRIVATE ATTRIBUTES
     private final IWorldMap map;
     private final Random rng;

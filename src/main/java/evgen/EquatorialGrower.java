@@ -1,5 +1,7 @@
 package evgen;
 
+import java.util.Random;
+
 import org.javatuples.Pair;
 
 public class EquatorialGrower extends AbstractFoliageGrower {
@@ -22,7 +24,13 @@ public class EquatorialGrower extends AbstractFoliageGrower {
         }
     }
 
-    public EquatorialGrower(IWorldMap m) {
-        super(m);
+    public EquatorialGrower(Random r, Settings s, IWorldMap m) {
+        super(r, s, m);
     }
+
+    public EquatorialGrower(IWorldMap m) {
+        this(World.rng, World.settings, m);
+    }
+
+    public void animalDiedAt(Vector2d pos) {};
 }
