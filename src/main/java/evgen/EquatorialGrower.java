@@ -2,19 +2,19 @@ package evgen;
 
 import java.util.Random;
 
-import org.javatuples.Pair;
+import evgen.lib.Pair;
 
 public class EquatorialGrower extends AbstractFoliageGrower {
     protected void setupPreferredSpots() {
         final Pair<Vector2d, Vector2d> bounds = map.getMapBounds();
-        int midY = (bounds.getValue0().y + bounds.getValue1().y) / 2;
+        int midY = (bounds.first.y + bounds.second.y) / 2;
         int currY = midY;
         int diffY = 1;
-        int currX = bounds.getValue0().x;
+        int currX = bounds.first.x;
         int preferredCounter = preferredSpotAmount;
         while (preferredCounter > 0) {
-            if (currX > bounds.getValue1().x) {
-                currX = bounds.getValue0().x;
+            if (currX > bounds.second.x) {
+                currX = bounds.first.x;
                 currY = midY + diffY;
                 diffY = (diffY < 0) ? -diffY + 1 : -diffY;
             }

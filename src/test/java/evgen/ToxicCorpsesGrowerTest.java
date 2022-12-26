@@ -8,10 +8,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.Random;
 
-import org.javatuples.Pair;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import evgen.lib.Pair;
 
 public class ToxicCorpsesGrowerTest {
     private static final long rngSeed = 20010911l;

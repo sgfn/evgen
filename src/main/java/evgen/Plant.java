@@ -1,5 +1,7 @@
 package evgen;
 
+import evgen.lib.ConsoleColour;
+
 public class Plant extends AbstractMapElement {
     public Plant(Vector2d p) {
         pos = p;
@@ -7,7 +9,7 @@ public class Plant extends AbstractMapElement {
 
     @Override
     public String toString() {
-        return "*";
+        return ConsoleColour.colourise("*", ConsoleColour.Colour.GREEN);
     }
 
     @Override

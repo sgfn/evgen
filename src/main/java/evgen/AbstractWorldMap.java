@@ -1,12 +1,15 @@
 package evgen;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.javatuples.Pair;
+import evgen.lib.Pair;
 
 public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
     // PROTECTED ATTRIBUTES
@@ -15,7 +18,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
 
     protected final Random rng;
     protected final Settings settings;
-    protected final MapVisualizer mapVis = new MapVisualizer(this);
+    protected final MapVisualizer mapVis;
     protected final IFoliageGrower foliageGen;
 
     protected int nextAnimalID = 0;
@@ -35,6 +38,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         } else {
             foliageGen = f;
         }
+        mapVis = new MapVisualizer(this, foliageGen);
         growFoliage(settings.getStartingFoliage());
     }
 
@@ -46,6 +50,55 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
             s.add(animal);
             animals.put(pos, s);
         }
+    }
+
+    private void removeAnimalFromMap(Animal animal) {
+        animals.get(animal.getPosition()).remove(animal);
+    }
+
+    private void ageUpAndMoveAll() {
+        List<Animal> markedForDelete = new LinkedList<>();
+        for (Animal a : animalsByID.values()) {
+            // Remove animal if dead, move if alive
+            if (!a.ageUp()) {
+                markedForDelete.add(a);
+            } else {
+                a.move();
+            }
+        }
+        for (Animal a : markedForDelete) {
+            removeAnimalFromMap(a);
+            animalsByID.remove(a.getID());
+            foliageGen.animalDiedAt(a.getPosition());
+            a.removeObserver(this);
+            a = null;
+        }
+    }
+
+    private void feedAndProcreateAll() {
+        for (Vector2d spot : animals.keySet()) {
+            SortedSet<Animal> s = animals.get(spot);
+            // Feed strongest from spot
+            if (s.size() > 0 && foliage.get(spot) != null) {
+                s.first().eat();
+                foliage.remove(spot);
+                foliageGen.plantEaten(spot);
+            }
+            // Allow procreation of two strongest from spot
+            if (s.size() > 1) {
+                Iterator<Animal> it = s.iterator();
+                final Animal first = it.next();
+                final Animal second = it.next();
+                // Second one cannot have more energy than first
+                if (second.canProcreate()) {
+                    place(first.procreate(second));
+                }
+            }
+        }
+    }
+
+    private void growDailyFoliage() {
+        growFoliage(settings.getDailyFoliageGrowth());
     }
 
     // PROTECTED METHODS
@@ -66,17 +119,6 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
             }
             Plant p = new Plant(spot);
             foliage.put(p.getPosition(), p);
-        }
-    }
-
-    protected void feedAnimals() {
-        // XXX: maybe rethink?
-        for (Vector2d spot : animals.keySet()) {
-            if (animals.get(spot).size() > 0 && foliage.get(spot) != null) {
-                animals.get(spot).first().eat();
-                foliage.remove(spot);
-                foliageGen.plantEaten(spot);
-            }
         }
     }
 
@@ -107,9 +149,6 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         }
         return false;
     }
-
-    // TODO: implement removing animals from map at their death -- will probably be handled by simulation engine
-    // XXX: make sure to inform ToxicCorpsesGrower about death of animals!
 
     /**
      * Check whether a given spot on the map is occupied
@@ -164,6 +203,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
      * Get unique ID for a new animal to be added to the map
      * @return unique ID for the new animal
      */
+    @Override
     public int getNextAnimalID() {
         return nextAnimalID++;
     }
@@ -174,9 +214,26 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
      * @param a animal to move
      * @return pair containing target position and direction, in that order
      */
+    @Override
     public abstract Pair<Vector2d, MapDirection> attemptMove(Animal a);
 
+    /**
+     * Get map boundaries
+     * @return pair containing map lower-left and upper-right boundary, in that order
+     */
+    @Override
     public Pair<Vector2d, Vector2d> getMapBounds() {
         return new Pair<>(boundaryLowerLeft, boundaryUpperRight);
+    }
+
+    /**
+     * Advance to next epoch -- age animals up, move them, feed them,
+     * allow procreation, grow foliage
+     */
+    @Override
+    public void nextEpoch() {
+        ageUpAndMoveAll();
+        feedAndProcreateAll();
+        growDailyFoliage();
     }
 }

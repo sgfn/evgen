@@ -1,5 +1,7 @@
 package evgen;
 
+import evgen.lib.ConsoleColour;
+
 /**
  * The map visualizer converts the {@link IWorldMap} map into a string
  * representation.
@@ -11,13 +13,15 @@ public class MapVisualizer {
     private static final String FRAME_SEGMENT = "-";
     private static final String CELL_SEGMENT = "|";
     private IWorldMap map;
+    private IFoliageGrower foliageGen;
 
     /**
      * Initializes the MapVisualizer with an instance of map to visualize. 
      * @param map
      */
-    public MapVisualizer(IWorldMap map) {
+    public MapVisualizer(IWorldMap map, IFoliageGrower foliageGen) {
         this.map = map;
+        this.foliageGen = foliageGen;
     }
 
     /**
@@ -80,6 +84,9 @@ public class MapVisualizer {
             }
         } else {
             result = EMPTY_CELL;
+        }
+        if (this.foliageGen.isPreferred(currentPosition)) {
+            result = ConsoleColour.brighter(ConsoleColour.colouriseBackground(result, ConsoleColour.Colour.BLACK));
         }
         return result;
     }

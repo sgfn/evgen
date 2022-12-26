@@ -23,11 +23,11 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit Jupiter for testing.
+    // Use JUnit Jupiter and Mockito for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     testImplementation 'org.mockito:mockito-core:3.+'
+    // Use snakeyaml to parse YAML files
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.23'
-    implementation group: 'org.javatuples', name: 'javatuples', version: '1.2'
 }
 
 application {

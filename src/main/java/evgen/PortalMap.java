@@ -2,7 +2,7 @@ package evgen;
 
 import java.util.Random;
 
-import org.javatuples.Pair;
+import evgen.lib.Pair;
 
 public class PortalMap extends AbstractWorldMap {
     public PortalMap(Random r, Settings s, IFoliageGrower f) {
