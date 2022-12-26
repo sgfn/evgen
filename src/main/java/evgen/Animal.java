@@ -4,7 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.javatuples.Pair;
+import evgen.lib.ConsoleColour;
+import evgen.lib.Pair;
 
 public class Animal extends AbstractMapElement {
     // PRIVATE ATTRIBUTES
@@ -49,6 +50,11 @@ public class Animal extends AbstractMapElement {
         this(r, s, m, p, new Genotype(r, s, World.indexGen));
     }
 
+    public Animal(Random r, Settings s, IWorldMap m) {
+        this(r, s, m, new Vector2d(r.nextInt(m.getMapBounds().first.x, m.getMapBounds().second.x + 1),
+                                   r.nextInt(m.getMapBounds().first.y, m.getMapBounds().second.y + 1)));
+    }
+
     public Animal(IWorldMap m, Vector2d p) {
         this(World.rng, World.settings, m, p);
     }
@@ -73,9 +79,9 @@ public class Animal extends AbstractMapElement {
     public void move() {
         facing = facing.updateDirection(genes.nextDirection());
         Pair<Vector2d, MapDirection> p = map.attemptMove(this);
-        notifyObservers(pos, p.getValue0());
-        pos = p.getValue0();
-        facing = p.getValue1();
+        notifyObservers(pos, p.first);
+        pos = p.first;
+        facing = p.second;
     }
 
     /**
@@ -119,16 +125,17 @@ public class Animal extends AbstractMapElement {
 
     @Override
     public String toString() {
-        return switch (facing) {
-            case EAST -> "\u27a1";
-            case WEST -> "\u2b05";
-            case NORTH -> "\u2b06";
-            case SOUTH -> "\u2b07";
+        String s = switch (facing) {
+            case WEST -> "\u2190";
+            case NORTH -> "\u2191";
+            case SOUTH -> "\u2192";
+            case EAST -> "\u2193";
             case NORTHWEST -> "\u2196";
             case NORTHEAST -> "\u2197";
             case SOUTHEAST -> "\u2198";
             case SOUTHWEST -> "\u2199";
         };
+        return ConsoleColour.colourise(s, ConsoleColour.Colour.CYAN);
     }
 
     @Override

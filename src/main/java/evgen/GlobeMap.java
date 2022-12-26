@@ -2,7 +2,7 @@ package evgen;
 
 import java.util.Random;
 
-import org.javatuples.Pair;
+import evgen.lib.Pair;
 
 public class GlobeMap extends AbstractWorldMap {
     public GlobeMap(Random r, Settings s, IFoliageGrower f) {

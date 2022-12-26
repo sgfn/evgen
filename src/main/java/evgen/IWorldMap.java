@@ -1,6 +1,6 @@
 package evgen;
 
-import org.javatuples.Pair;
+import evgen.lib.Pair;
 
 public interface IWorldMap {
     boolean canPlaceAt(Vector2d position);
@@ -10,4 +10,5 @@ public interface IWorldMap {
     int getNextAnimalID();
     Pair<Vector2d, MapDirection> attemptMove(Animal a);
     Pair<Vector2d, Vector2d> getMapBounds();
+    void nextEpoch();
 }

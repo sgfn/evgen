@@ -4,8 +4,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import org.javatuples.Pair;
-
+import evgen.lib.Pair;
 import evgen.lib.RandomSet;
 
 public abstract class AbstractFoliageGrower implements IFoliageGrower {
@@ -26,8 +25,8 @@ public abstract class AbstractFoliageGrower implements IFoliageGrower {
         map = m;
         preferredSpotAmount = settings.getMapHeight() * settings.getMapWidth() / 5;
         final Pair<Vector2d, Vector2d> bounds = m.getMapBounds();
-        for (int x = bounds.getValue0().x; x <= bounds.getValue1().x; ++x) {
-            for (int y = bounds.getValue0().y; y <= bounds.getValue1().y; ++y) {
+        for (int x = bounds.first.x; x <= bounds.second.x; ++x) {
+            for (int y = bounds.first.y; y <= bounds.second.y; ++y) {
                 availableRegularSpots.add(new Vector2d(x, y));
             }
         }
@@ -38,6 +37,7 @@ public abstract class AbstractFoliageGrower implements IFoliageGrower {
         availableRegularSpots.removeAll(preferredSpots);
     }
 
+    @Override
     public void plantEaten(Vector2d pos) {
         if (preferredSpots.contains(pos)) {
             availablePreferredSpots.add(pos);
@@ -46,6 +46,7 @@ public abstract class AbstractFoliageGrower implements IFoliageGrower {
         }
     }
 
+    @Override
     public Vector2d getPlantSpot() {
         Vector2d rv = null;
         // 80% chance that a plant will grow at a preferred spot
@@ -57,5 +58,11 @@ public abstract class AbstractFoliageGrower implements IFoliageGrower {
         return rv;
     }
 
+    @Override
     public abstract void animalDiedAt(Vector2d pos);
+
+    @Override
+    public boolean isPreferred(Vector2d pos) {
+        return preferredSpots.contains(pos);
+    }
 }

@@ -95,29 +95,29 @@ public class AbstractWorldMapTest {
         assertTrue(m.foliage.containsKey(new Vector2d(1, 1)));
     }
 
-    @Test
-    void testAbstractWorldMapFeedAnimals() {
-        when(s.getStartingFoliage()).thenReturn(1);
-        when(f.getPlantSpot()).thenReturn(new Vector2d(2, 2));
-        AbstractWorldMap m = new GlobeMap(rng, s, f);
-        assertTrue(m.foliage.containsKey(new Vector2d(2, 2)));
+    // @Test
+    // void testAbstractWorldMapFeedAnimals() {
+    //     when(s.getStartingFoliage()).thenReturn(1);
+    //     when(f.getPlantSpot()).thenReturn(new Vector2d(2, 2));
+    //     AbstractWorldMap m = new GlobeMap(rng, s, f);
+    //     assertTrue(m.foliage.containsKey(new Vector2d(2, 2)));
 
-        m.feedAnimals();
+    //     m.feedAnimals();
 
-        Animal a = mock(Animal.class);
-        when(a.getID()).thenReturn(1337);
-        when(a.getPosition()).thenReturn(new Vector2d(3, 3));
-        m.place(a);
+    //     Animal a = mock(Animal.class);
+    //     when(a.getID()).thenReturn(1337);
+    //     when(a.getPosition()).thenReturn(new Vector2d(3, 3));
+    //     m.place(a);
 
-        m.feedAnimals();
-        verify(a, times(0)).eat();
+    //     m.feedAnimals();
+    //     verify(a, times(0)).eat();
 
-        m.positionChanged(1337, new Vector2d(3, 3), new Vector2d(2, 2));
-        m.feedAnimals();
-        verify(a, times(1)).eat();
-        assertFalse(m.foliage.containsKey(new Vector2d(2, 2)));
-        verify(f).plantEaten(new Vector2d(2, 2));
-    }
+    //     m.positionChanged(1337, new Vector2d(3, 3), new Vector2d(2, 2));
+    //     m.feedAnimals();
+    //     verify(a, times(1)).eat();
+    //     assertFalse(m.foliage.containsKey(new Vector2d(2, 2)));
+    //     verify(f).plantEaten(new Vector2d(2, 2));
+    // }
 
     @Test
     void testAbstractWorldMapObjectAt() {
