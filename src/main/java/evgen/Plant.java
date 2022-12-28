@@ -9,6 +9,11 @@ public class Plant extends AbstractMapElement {
 
     @Override
     public String toString() {
+        return String.format("P%s", pos.toString());
+    }
+
+    @Override
+    public String getSprite() {
         return ConsoleColour.colourise("*", ConsoleColour.Colour.GREEN);
     }
 

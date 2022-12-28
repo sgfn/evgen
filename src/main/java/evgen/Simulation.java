@@ -37,6 +37,10 @@ public class Simulation implements Runnable {
 
             map.nextEpoch();
             System.out.println(String.format("epoch %d\n%s", ++epoch, map));
+            // if (epoch == 69) {
+            //     AbstractWorldMap m = (AbstractWorldMap)map;
+            //     m.setPDD();
+            // }
         }
     }
 }

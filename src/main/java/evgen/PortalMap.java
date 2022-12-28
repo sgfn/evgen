@@ -26,8 +26,13 @@ public class PortalMap extends AbstractWorldMap {
             (fromPos.y == boundaryUpperRight.y && (fromDir == MapDirection.NORTH || fromDir == MapDirection.NORTHEAST || fromDir == MapDirection.NORTHWEST)) ||
             (fromPos.x == boundaryLowerLeft.x  && (fromDir == MapDirection.WEST  || fromDir == MapDirection.NORTHWEST || fromDir == MapDirection.SOUTHWEST)) ||
             (fromPos.x == boundaryUpperRight.x && (fromDir == MapDirection.EAST  || fromDir == MapDirection.NORTHEAST || fromDir == MapDirection.SOUTHEAST))) {
-            // Hellish portal hurts
+            // Hellish portal hurts. Reinsert the animal with updated energy.
+            boolean rc = animals.get(fromPos).remove(a);
+            assert rc;
             a.loseEnergy();
+            rc = animals.get(fromPos).add(a);
+            assert rc;
+
             return new Pair<>(
                 new Vector2d(rng.nextInt(boundaryLowerLeft.x, boundaryUpperRight.x),
                              rng.nextInt(boundaryLowerLeft.y, boundaryUpperRight.y)),
