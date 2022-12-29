@@ -49,7 +49,7 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
     }
 
     public Animal(Random r, Settings s, IWorldMap m, Vector2d p) {
-        this(r, s, m, p, new Genotype(r, s, World.indexGen));
+        this(r, s, m, p, new Genotype(r, s));
     }
 
     public Animal(Random r, Settings s, IWorldMap m) {

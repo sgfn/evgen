@@ -16,7 +16,6 @@ public class GenotypeTest {
     private static final Settings s = mock(Settings.class);
 
     private Random rng;
-    private GenotypeMutationIndexGenerator indexGen;
 
     @BeforeAll
     static void setUpOnce() {
@@ -26,7 +25,7 @@ public class GenotypeTest {
     @BeforeEach
     void setUp() {
         rng = new Random(rngSeed);
-        indexGen = new GenotypeMutationIndexGenerator(rng);
+        GenotypeMutationIndexGenerator.init(rng);
         when(s.getBehaviourType()).thenReturn(Settings.BehaviourType.PREDESTINED);
         when(s.getMutationType()).thenReturn(Settings.MutationType.STEP);
         when(s.getMinMutations()).thenReturn(0);
@@ -37,7 +36,7 @@ public class GenotypeTest {
     void testGenotypeDefaultConstructorAndNextDirection() {
         final int[] expectedGenome = {0, 0, 4, 5, 0, 6, 6, 5, 2, 6};
 
-        Genotype g = new Genotype(rng, s, indexGen);
+        Genotype g = new Genotype(rng, s);
         assertEquals("0045066526", g.toString());
         assertEquals(0, g.getNextGeneIndex());
 
@@ -52,7 +51,7 @@ public class GenotypeTest {
         when(s.getBehaviourType()).thenReturn(Settings.BehaviourType.CRAZY);
 
         final int[] expectedGenome = {0, 0, 4, 5, 0, 6, 6, 5, 2, 6};
-        Genotype g = new Genotype(rng, s, indexGen);
+        Genotype g = new Genotype(rng, s);
         assertEquals("0045066526", g.toString());
         assertEquals(0, g.getNextGeneIndex());
 
@@ -72,11 +71,11 @@ public class GenotypeTest {
 
     @Test
     void testGenotypeChildConstructorNoMutations() {
-        Genotype tg1 = new Genotype(rng, s, indexGen);
+        Genotype tg1 = new Genotype(rng, s);
         assertEquals("0045066526", tg1.toString());
         assertEquals(0, tg1.getNextGeneIndex());
 
-        Genotype tg2 = new Genotype(rng, s, indexGen);
+        Genotype tg2 = new Genotype(rng, s);
         assertEquals("1164677623", tg2.toString());
         assertEquals(7, tg2.getNextGeneIndex());
 
@@ -110,11 +109,11 @@ public class GenotypeTest {
         when(s.getMinMutations()).thenReturn(10);
         when(s.getMaxMutations()).thenReturn(10);
 
-        Genotype tg1 = new Genotype(rng, s, indexGen);
+        Genotype tg1 = new Genotype(rng, s);
         assertEquals("0045066526", tg1.toString());
         assertEquals(0, tg1.getNextGeneIndex());
 
-        Genotype tg2 = new Genotype(rng, s, indexGen);
+        Genotype tg2 = new Genotype(rng, s);
         assertEquals("1164677623", tg2.toString());
         assertEquals(7, tg2.getNextGeneIndex());
 
@@ -135,11 +134,11 @@ public class GenotypeTest {
         when(s.getMaxMutations()).thenReturn(4);
         when(s.getMutationType()).thenReturn(Settings.MutationType.RANDOM);
 
-        Genotype tg1 = new Genotype(rng, s, indexGen);
+        Genotype tg1 = new Genotype(rng, s);
         assertEquals("0045066526", tg1.toString());
         assertEquals(0, tg1.getNextGeneIndex());
 
-        Genotype tg2 = new Genotype(rng, s, indexGen);
+        Genotype tg2 = new Genotype(rng, s);
         assertEquals("1164677623", tg2.toString());
         assertEquals(7, tg2.getNextGeneIndex());
 

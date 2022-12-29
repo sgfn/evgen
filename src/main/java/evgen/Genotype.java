@@ -10,7 +10,6 @@ public class Genotype {
 
     private final Random rng;
     private final Settings settings;
-    private final GenotypeMutationIndexGenerator indexGen;
 
     private int[] genome;
     private int nextGeneIndex;
@@ -20,12 +19,10 @@ public class Genotype {
      * as in the provided settings; use provided RNG
      * @param r Random object to use as RNG
      * @param s Settings object to use as settings
-     * @param ig GenotypeMutationIndexGenerator singleton instance
      */
-    public Genotype(Random r, Settings s, GenotypeMutationIndexGenerator ig) {
+    public Genotype(Random r, Settings s) {
         rng = r;
         settings = s;
-        indexGen = ig;
         genotypeLength = settings.getGenomeLength();
         stepMutations = settings.getMutationType() == Settings.MutationType.STEP;
         crazyBehaviour = settings.getBehaviourType() == Settings.BehaviourType.CRAZY;
@@ -40,10 +37,9 @@ public class Genotype {
     /**
      * Create a new genotype -- length, mutation variant and behaviour variant
      * as in the global settings; use global RNG
-     * as well as global GenotypeMutationIndexGenerator singleton instance
      */
     public Genotype() {
-        this(World.rng, World.settings, World.indexGen);
+        this(World.rng, World.settings);
     }
 
     /**
@@ -55,7 +51,6 @@ public class Genotype {
     public Genotype(Genotype pg1, Genotype pg2, double ratio) {
         rng = pg1.rng;
         settings = pg1.settings;
-        indexGen = pg1.indexGen;
         genotypeLength = pg1.genotypeLength;
         stepMutations = pg1.stepMutations;
         crazyBehaviour = pg1.crazyBehaviour;
@@ -80,7 +75,7 @@ public class Genotype {
             mutationAmount = rng.nextInt(settings.getMinMutations(), settings.getMaxMutations()+1);
         }
 
-        List<Integer> mutationIndices = indexGen.pollRandomSeveral(genotypeLength, mutationAmount);
+        List<Integer> mutationIndices = GenotypeMutationIndexGenerator.getInstance().pollRandomSeveral(genotypeLength, mutationAmount);
         for (final int mutationIndex : mutationIndices) {
             if (!stepMutations) {
                 int g;
