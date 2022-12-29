@@ -7,7 +7,7 @@ import java.util.Random;
 import evgen.lib.ConsoleColour;
 import evgen.lib.Pair;
 
-public class Animal extends AbstractMapElement {
+public class Animal extends AbstractMapElement implements Comparable<Animal> {
     // PRIVATE ATTRIBUTES
     private final IWorldMap map;
     private final Random rng;
@@ -18,6 +18,8 @@ public class Animal extends AbstractMapElement {
     private int age = 0;
     private int children = 0;
     private List<IPositionChangeObserver> observers = new LinkedList<>();
+
+    public boolean pdb = false;
 
     // PUBLIC ATTRIBUTES
     public final int id;
@@ -79,9 +81,18 @@ public class Animal extends AbstractMapElement {
     public void move() {
         facing = facing.updateDirection(genes.nextDirection());
         Pair<Vector2d, MapDirection> p = map.attemptMove(this);
-        notifyObservers(pos, p.first);
+        Vector2d oldPos = pos;
         pos = p.first;
         facing = p.second;
+        notifyObservers(oldPos, pos);
+    }
+
+    /**
+     * Check whether the animal is alive.
+     * @return true if animal is still alive, false otherwise
+     */
+    public boolean isAlive() {
+        return energy > 0;
     }
 
     /**
@@ -90,7 +101,8 @@ public class Animal extends AbstractMapElement {
      */
     public boolean ageUp() {
         ++age;
-        return --energy > 0;
+        --energy;
+        return isAlive();
     }
 
     /**
@@ -107,14 +119,15 @@ public class Animal extends AbstractMapElement {
      * @return Animal -- child of this and other
      */
     public Animal procreate(Animal other) {
+        Debug.print(String.format("p1.e=%d p2.e=%d ", this.energy, other.energy));
         final double ratio = (double)(this.energy) / (this.energy + other.energy);
+        assert ratio > 0 && ratio < 1;
         Genotype childGenes = new Genotype(this.genes, other.genes, ratio);
-        final int energyLoss = settings.getProcreationEnergyLoss();
-        energy -= energyLoss;
-        other.energy -= energyLoss;
+        this.loseEnergy();
+        other.loseEnergy();
         ++this.children;
         ++other.children;
-        return new Animal(rng, settings, map, pos, childGenes, 2*energyLoss);
+        return new Animal(rng, settings, map, pos, childGenes, 2*settings.getProcreationEnergyLoss());
     }
 
     public MapDirection getFacing() { return facing; }
@@ -125,17 +138,46 @@ public class Animal extends AbstractMapElement {
 
     @Override
     public String toString() {
+        return String.format("A%d.p%s.f%s.e%d.%dy.%dc", id, pos, facing, energy, age, children);
+    }
+
+    @Override
+    public String getSprite() {
         String s = switch (facing) {
             case WEST -> "\u2190";
             case NORTH -> "\u2191";
-            case SOUTH -> "\u2192";
-            case EAST -> "\u2193";
+            case EAST -> "\u2192";
+            case SOUTH -> "\u2193";
             case NORTHWEST -> "\u2196";
             case NORTHEAST -> "\u2197";
             case SOUTHEAST -> "\u2198";
             case SOUTHWEST -> "\u2199";
         };
         return ConsoleColour.colourise(s, ConsoleColour.Colour.CYAN);
+    }
+
+    @Override
+    public int compareTo(Animal other) {
+        if (this.id == other.id) {
+            return 0;
+        }
+
+        int res = this.energy - other.energy;
+        if (res == 0) {
+            res = this.age - other.age;
+        }
+        if (res == 0) {
+            res = this.children - other.children;
+        }
+        if (res == 0) {
+            res = this.id - other.id;
+        }
+        return -res;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof Animal) && (this.compareTo((Animal) o) == 0);
     }
 
     @Override

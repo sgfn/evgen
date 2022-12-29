@@ -17,7 +17,8 @@ public class Simulation implements Runnable {
 
         // XXX: maybe refactor the following into AbstractWorldMap constructor?
         for (int i = 0; i < s.getStartingAnimals(); ++i) {
-            map.place(new Animal(rng, settings, map));
+            boolean rc = map.place(new Animal(rng, settings, map));
+            assert rc;
         }
 
         this.epochDelay = epochDelay;

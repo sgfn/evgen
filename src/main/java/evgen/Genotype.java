@@ -67,6 +67,7 @@ public class Genotype {
 
         // find index at which to cut the genome
         final int cut = switchSides ? genotypeLength-(int)(ratio * genotypeLength) : (int)(ratio * genotypeLength);
+        Debug.println(String.format("switchSides=%s cut=%d ratio=%f", switchSides, cut, ratio));
         for (int i = switchSides ? cut : 0; i < (switchSides ? genotypeLength : cut); ++i) {
             genome[i] = pg1.genome[i];
         }

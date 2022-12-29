@@ -38,6 +38,7 @@ public class PortalMapTest {
         Animal a = mock(Animal.class);
         when(a.getPosition()).thenReturn(new Vector2d(2, 2));
         when(a.getFacing()).thenReturn(MapDirection.NORTH);
+        when(a.getID()).thenReturn(1337);
         m.place(a);
 
         // Regular move
@@ -45,10 +46,12 @@ public class PortalMapTest {
 
         // Any side - get teleported, lose energy
         when(a.getPosition()).thenReturn(new Vector2d(2, 4));
+        m.positionChanged(a.getID(), new Vector2d(2, 2), new Vector2d(2, 4));
         assertEquals(new Pair<>(new Vector2d(0, 3), MapDirection.NORTH), m.attemptMove(a));
         verify(a, times(1)).loseEnergy();
 
         when(a.getPosition()).thenReturn(new Vector2d(0, 0));
+        m.positionChanged(a.getID(), new Vector2d(2, 4), new Vector2d(0, 0));
         when(a.getFacing()).thenReturn(MapDirection.SOUTHWEST);
         assertEquals(new Pair<>(new Vector2d(2, 3), MapDirection.NORTH), m.attemptMove(a));
         verify(a, times(2)).loseEnergy();
@@ -58,6 +61,7 @@ public class PortalMapTest {
         verify(a, times(3)).loseEnergy();
 
         when(a.getPosition()).thenReturn(new Vector2d(4, 4));
+        m.positionChanged(a.getID(), new Vector2d(0, 0), new Vector2d(4, 4));
         when(a.getFacing()).thenReturn(MapDirection.SOUTHEAST);
         assertEquals(new Pair<>(new Vector2d(3, 3), MapDirection.NORTHEAST), m.attemptMove(a));
         verify(a, times(4)).loseEnergy();

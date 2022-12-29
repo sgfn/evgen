@@ -78,7 +78,8 @@ public class MapVisualizer {
         if (this.map.isOccupied(currentPosition)) {
             Object object = this.map.objectAt(currentPosition);
             if (object != null) {
-                result = object.toString();
+                IMapElement me = (IMapElement)object;
+                result = me.getSprite();
             } else {
                 result = EMPTY_CELL;
             }
