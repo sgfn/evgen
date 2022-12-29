@@ -65,7 +65,6 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      * Gain energy as if from eating.
      */
     public void eat() {
-        if(pdb) System.out.println("animal eating");
         energy += settings.getEnergyGain();
     }
 
@@ -73,7 +72,6 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      * Lose energy as if by procreation.
      */
     public void loseEnergy() {
-        if(pdb) System.out.println("animal losing energy");
         energy -= settings.getProcreationEnergyLoss();
     }
 
@@ -86,7 +84,6 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
         Vector2d oldPos = pos;
         pos = p.first;
         facing = p.second;
-        if(pdb) System.out.println(String.format("animal moving from %s to %s", oldPos, pos));
         notifyObservers(oldPos, pos);
     }
 
@@ -95,7 +92,6 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      * @return true if animal is still alive, false otherwise
      */
     public boolean isAlive() {
-        if(pdb) System.out.println(String.format("animal checking whether alive: %s", energy > 0));
         return energy > 0;
     }
 
@@ -106,7 +102,6 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
     public boolean ageUp() {
         ++age;
         --energy;
-        if(pdb) System.out.println(String.format("animal aging up: age=%d energy=%d", age, energy));
         return isAlive();
     }
 
@@ -114,7 +109,6 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      * Check whether the animal has enough energy to procreate.
      */
     public boolean canProcreate() {
-        if(pdb) System.out.println(String.format("animal checking whether can procreate: %s", energy >= settings.getMinProcreationEnergy()));
         return energy >= settings.getMinProcreationEnergy();
     }
 
@@ -125,8 +119,7 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      * @return Animal -- child of this and other
      */
     public Animal procreate(Animal other) {
-        if(pdb) System.out.println(String.format("animal initiating procreation %s", "."));
-        System.out.print(String.format("p1.e=%d p2.e=%d ", this.energy, other.energy));
+        Debug.print(String.format("p1.e=%d p2.e=%d ", this.energy, other.energy));
         final double ratio = (double)(this.energy) / (this.energy + other.energy);
         assert ratio > 0 && ratio < 1;
         Genotype childGenes = new Genotype(this.genes, other.genes, ratio);

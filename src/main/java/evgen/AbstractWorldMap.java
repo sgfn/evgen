@@ -19,13 +19,13 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     protected final MapVisualizer mapVis;
     protected final IFoliageGrower foliageGen;
 
-    protected boolean pdd = false;
-
     protected int nextAnimalID = 0;
     // Can have multiple animals at same spot, but only one plant
     protected Map<Integer, Animal> animalsByID = new HashMap<>();
     protected Map<Vector2d, TreeSet<Animal>> animals = new HashMap<>();
     protected Map<Vector2d, IMapElement> foliage = new HashMap<>();
+
+    protected List<Animal> markedForDelete = new LinkedList<>();
 
     // PRIVATE METHODS
     private AbstractWorldMap(Random r, Settings s, IFoliageGrower f, boolean useDefaultGrowers) {
@@ -66,44 +66,43 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         assert !animals.get(pos).contains(animal);
     }
 
-    private void cleanUpOne(Animal a) {
-        System.out.println(String.format("Animal with id %d dies", a.getID()));
-        removeAnimalFromMap(a);
-        animalsByID.remove(a.getID());
-        foliageGen.animalDiedAt(a.getPosition());
-        a.removeObserver(this);
-        a = null;
+    private void markForDelete(Animal a) {
+        markedForDelete.add(a);
+    }
+
+    private void deleteMarked() {
+        for (Animal a : markedForDelete) {
+            Debug.println((String.format("Animal with id %d dies", a.getID())));
+            removeAnimalFromMap(a);
+            Object o = animalsByID.remove(a.getID());
+            assert o.equals(a);
+            foliageGen.animalDiedAt(a.getPosition());
+            a.removeObserver(this);
+            a = null;
+        }
+        markedForDelete.clear();
     }
 
     private void cleanUpAll() {
-        List<Animal> markedForDelete = new LinkedList<>();
         for (Animal a : animalsByID.values()) {
             if (!a.isAlive()) {
-                markedForDelete.add(a);
+                markForDelete(a);
             }
         }
-        // markedForDelete.forEach((Animal a) -> {cleanUpOne(a);});
-        for (Animal a : markedForDelete) {
-            cleanUpOne(a);
-        }
+        deleteMarked();
     }
 
     private void moveAll() {
-        List<Animal> markedForDelete = new LinkedList<>();
         for (Animal a : animalsByID.values()) {
             assert a.isAlive();
             assert animals.get(a.getPosition()).contains(a) : String.format("moveAll detected desync between animal pos and set, a=%s, s=%s", a, animals.get(a.getPosition()));
-            if(pdd) printDebugData();
             a.move();
             // PortalMap: teleportation may kill the animal -- XXX: export only to portalmap
             if (!a.isAlive()) {
-                markedForDelete.add(a);
+                markForDelete(a);
             }
         }
-
-        for (Animal a : markedForDelete) {
-            cleanUpOne(a);
-        }
+        deleteMarked();
     }
 
     private void feedAndProcreateAll() {
@@ -125,43 +124,27 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
                 // Second one cannot have more energy than first
                 assert first.getEnergy() >= second.getEnergy() : "Second has more energy than first" + String.format("c=%s s=%s m.p1.e=%d m.p2.e=%d ", spot.toString(), animals.get(spot), first.getEnergy(), second.getEnergy());
                 if (second.canProcreate()) {
-                    System.out.print(String.format("c=%s s=%s ", spot.toString(), animals.get(spot)));
-
-                    if(pdd) printDebugData();
-                    // animals have been removed, cannot assert
-                    // assert animals.get(spot).contains(first) : "Assertion before procreation for first one failed";
-                    // assert animals.get(spot).contains(second) : "Assertion before procreation for second one failed";
+                    Debug.print(String.format("procreation c=%s s=%s ", spot.toString(), animals.get(spot)));
 
                     Animal child = first.procreate(second);
                     // Update positions of both parents in the set
-                    if(pdd) printDebugData();
-                    // see above, cannot assert
-                    // assert animals.get(spot).contains(first) : "Assertion after procreation for first one failed";
-                    // assert animals.get(spot).contains(second) : "Assertion after procreation for second one failed";
-
-                    // animals.get(spot).remove(first);
-                    // animals.get(spot).remove(second);
-
                     animals.get(spot).add(first);
                     animals.get(spot).add(second);
 
-                    if(pdd) printDebugData();
                     assert animals.get(spot).contains(first) : "Assertion after update for first one failed";
                     assert animals.get(spot).contains(second) : "Assertion after update for second one failed";
 
                     place(child);
 
-                    if(pdd) printDebugData();
                     assert animals.get(spot).contains(first) : "Assertion after child placement for first one failed";
                     assert animals.get(spot).contains(second) : "Assertion after child placement for second one failed";
                     assert animals.get(spot).contains(child) : "Assertion after child placement for child failed";
 
-                    System.out.println(String.format("new_s=%s", animals.get(spot)));
+                    Debug.println(String.format("new_s=%s", animals.get(spot)));
                 } else {
                     animals.get(spot).add(first);
                     animals.get(spot).add(second);
 
-                    if(pdd) printDebugData();
                     assert animals.get(spot).contains(first) : "Assertion after update for first one failed";
                     assert animals.get(spot).contains(second) : "Assertion after update for second one failed";
                 }
@@ -313,32 +296,24 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
      */
     @Override
     public void nextEpoch() {
-        System.out.println(animalsByID);
-        System.out.println(animals);
+        Debug.println(animalsByID);
+        Debug.println(animals);
         cleanUpAll();
-        if(pdd) printDebugData();
         moveAll();
-        if(pdd) printDebugData();
         feedAndProcreateAll();
-        if(pdd) printDebugData();
         growDailyFoliage();
-        if(pdd) printDebugData();
         ageUpAll();
-    }
-
-    public void setPDD() {
-        pdd = true;
     }
 
     public void printDebugData() {
         Animal a = animalsByID.get(74);
         Animal b = animalsByID.get(5);
         TreeSet<Animal> s = animals.get(new Vector2d(9, 13));
-        System.out.println(a.toString() + s.contains(a));
-        System.out.println(b.toString() + s.contains(b));
+        Debug.println(a.toString() + s.contains(a));
+        Debug.println(b.toString() + s.contains(b));
         for (var elem : s) {
-            System.out.println(elem.toString() +" "+ elem.compareTo(a) +" "+ elem.compareTo(b));
+            Debug.println(elem.toString() +" "+ elem.compareTo(a) +" "+ elem.compareTo(b));
         }
-        System.out.println();
+        Debug.println("");
     }
 }

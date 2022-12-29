@@ -11,13 +11,13 @@ public class World {
 
     public static void main(String[] args) {
         System.out.println("evgen");
-        // final long seed = new Random().nextLong();
-        final long seed = -6740656269889676863l;
-        System.out.println(String.format("seed %d", seed));
+
+        final long seed = new Random().nextLong();
+        System.out.println(String.format("seed: %d", seed));
         rng = new Random(seed);
         indexGen = new GenotypeMutationIndexGenerator(rng);
 
-        final String configPath = "config/other_config.yaml";
+        final String configPath = "config/sample_config.yaml";
         boolean rc = settings.loadConfig(configPath);
         System.out.println(String.format("Load config file `%s': %s", configPath, rc ? "successful" : "failed!"));
 

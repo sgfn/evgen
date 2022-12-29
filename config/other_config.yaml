@@ -1,3 +1,6 @@
+# This is an evgen configuration file.
+# Refer to config/README.md for more info.
+
 map_width: 10
 map_height: 15
 starting_foliage: 20

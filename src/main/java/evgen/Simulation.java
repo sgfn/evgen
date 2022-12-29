@@ -17,7 +17,8 @@ public class Simulation implements Runnable {
 
         // XXX: maybe refactor the following into AbstractWorldMap constructor?
         for (int i = 0; i < s.getStartingAnimals(); ++i) {
-            map.place(new Animal(rng, settings, map));
+            boolean rc = map.place(new Animal(rng, settings, map));
+            assert rc;
         }
 
         this.epochDelay = epochDelay;
@@ -37,10 +38,6 @@ public class Simulation implements Runnable {
 
             map.nextEpoch();
             System.out.println(String.format("epoch %d\n%s", ++epoch, map));
-            // if (epoch == 69) {
-            //     AbstractWorldMap m = (AbstractWorldMap)map;
-            //     m.setPDD();
-            // }
         }
     }
 }
