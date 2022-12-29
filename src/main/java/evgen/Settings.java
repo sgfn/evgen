@@ -9,6 +9,10 @@ import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 
 public class Settings {
+    private static final int MAX_ALLOWED_MAP_DIMENSION    = 50;
+    private static final int MAX_ALLOWED_STARTING_ANIMALS = 100;
+    private static final int MAX_ALLOWED_GENOME_LENGTH    = 100;
+
     // VARIANT ENUM DEFINITIONS
     public enum MapType {
         GLOBE, PORTAL
@@ -62,39 +66,75 @@ public class Settings {
                 switch (category) {
                     case "map_width":
                         mapWidth = (int)val;
+                        if (mapWidth <= 0 || mapWidth > MAX_ALLOWED_MAP_DIMENSION) {
+                            return false;
+                        }
                         break;
                     case "map_height":
                         mapHeight = (int)val;
+                        if (mapHeight <= 0 || mapHeight > MAX_ALLOWED_MAP_DIMENSION) {
+                            return false;
+                        }
                         break;
                     case "starting_foliage":
                         startingFoliage = (int)val;
+                        if (startingFoliage < 0) {
+                            return false;
+                        }
                         break;
                     case "energy_gain":
                         energyGain = (int)val;
+                        if (energyGain < 0) {
+                            return false;
+                        }
                         break;
                     case "daily_foliage_growth":
                         dailyFoliageGrowth = (int)val;
+                        if (dailyFoliageGrowth < 0) {
+                            return false;
+                        }
                         break;
                     case "starting_animals":
                         startingAnimals = (int)val;
+                        if (startingAnimals < 0 || startingAnimals > MAX_ALLOWED_STARTING_ANIMALS) {
+                            return false;
+                        }
                         break;
                     case "starting_energy":
                         startingEnergy = (int)val;
+                        if (startingEnergy < 0) {
+                            return false;
+                        }
                         break;
                     case "min_procreation_energy":
                         minProcreationEnergy = (int)val;
+                        if (minProcreationEnergy < 0) {
+                            return false;
+                        }
                         break;
                     case "procreation_energy_loss":
                         procreationEnergyLoss = (int)val;
+                        if (procreationEnergyLoss < 0) {
+                            return false;
+                        }
                         break;
                     case "min_mutations":
                         minMutations = (int)val;
+                        if (minMutations < 0) {
+                            return false;
+                        }
                         break;
                     case "max_mutations":
                         maxMutations = (int)val;
+                        if (maxMutations < 0) {
+                            return false;
+                        }
                         break;
                     case "genome_length":
                         genomeLength = (int)val;
+                        if (genomeLength <= 0 || genomeLength > MAX_ALLOWED_GENOME_LENGTH) {
+                            return false;
+                        }
                         break;
                     case "map_variant":
                         if (((String)val).equals("globe")) {
@@ -140,6 +180,14 @@ public class Settings {
             return false;
         }
 
+        if (minMutations > maxMutations || minMutations > genomeLength || maxMutations > genomeLength) {
+            return false;
+        }
+
+        if (procreationEnergyLoss > minProcreationEnergy) {
+            return false;
+        }
+
         return true;
     }
 
@@ -153,19 +201,18 @@ public class Settings {
     }
 
     public void restoreDefaults() {
-        // TODO: find sensible default values
-        mapWidth = 20;
+        mapWidth = 15;
         mapHeight = 10;
-        startingFoliage = 5;
+        startingFoliage = 10;
         energyGain = 5;
         dailyFoliageGrowth = 2;
-        startingAnimals = 2;
+        startingAnimals = 20;
         startingEnergy = 30;
         minProcreationEnergy = 15;
         procreationEnergyLoss = 10;
         minMutations = 0;
         maxMutations = 5;
-        genomeLength = 32;
+        genomeLength = 10;
         mapType = MapType.GLOBE;
         foliageGrowthType = FoliageGrowthType.EQUATOR;
         mutationType = MutationType.RANDOM;
