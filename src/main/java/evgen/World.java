@@ -17,7 +17,7 @@ public class World {
         rng = new Random(seed);
         indexGen = new GenotypeMutationIndexGenerator(rng);
 
-        final String configPath = "config/sample_config.yaml";
+        final String configPath = "config/default_config.yaml";
         boolean rc = settings.loadConfig(configPath);
         System.out.println(String.format("Load config file `%s': %s", configPath, rc ? "successful" : "failed!"));
 
