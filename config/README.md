@@ -41,7 +41,7 @@ map_width: 20
 map_height: 10
 starting_foliage: 10
 energy_gain: 5
-daily_foliage_growth: 2
+daily_foliage_growth: 3
 starting_animals: 5
 starting_energy: 30
 min_procreation_energy: 15

@@ -205,7 +205,7 @@ public class Settings {
         mapHeight = 10;
         startingFoliage = 10;
         energyGain = 5;
-        dailyFoliageGrowth = 2;
+        dailyFoliageGrowth = 3;
         startingAnimals = 20;
         startingEnergy = 30;
         minProcreationEnergy = 15;
@@ -219,7 +219,6 @@ public class Settings {
         behaviourType = BehaviourType.PREDESTINED;
     }
 
-    // XXX: When loading new config, make sure we recreate the entire thing
     public boolean loadConfig(String configPath) {
         // Load defaults, overwrite with config, then restore defaults if anything went wrong
         restoreDefaults();

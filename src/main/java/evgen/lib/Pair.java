@@ -38,4 +38,9 @@ public class Pair<E, F> {
     public int hashCode() {
         return Objects.hash(this.first, this.second);
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%s, %s)", this.first.toString(), this.second.toString());
+    }
 }

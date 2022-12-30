@@ -1,7 +1,5 @@
 package evgen;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
 import evgen.lib.ConsoleColour;
@@ -17,20 +15,10 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
     private int energy;
     private int age = 0;
     private int children = 0;
-    private List<IPositionChangeObserver> observers = new LinkedList<>();
-
-    public boolean pdb = false;
 
     // PUBLIC ATTRIBUTES
     public final int id;
     public final Genotype genes;
-
-    // PRIVATE METHODS
-    private void notifyObservers(Vector2d oldPos, Vector2d newPos) {
-        for (IPositionChangeObserver o : observers) {
-            o.positionChanged(id, oldPos, newPos);
-        }
-    }
 
     // PUBLIC METHODS
     public Animal(Random r, Settings s, IWorldMap m, Vector2d p, Genotype g, int e) {
@@ -76,15 +64,19 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
     }
 
     /**
-     * Move an animal according to its genome.
+     * Update facing with the next value from genome.
      */
-    public void move() {
+    public void updateFacing() {
         facing = facing.updateDirection(genes.nextDirection());
-        Pair<Vector2d, MapDirection> p = map.attemptMove(this);
-        Vector2d oldPos = pos;
-        pos = p.first;
-        facing = p.second;
-        notifyObservers(oldPos, pos);
+    }
+
+    /**
+     * Move an animal to the desired position and facing.
+     * @param target pair of position and facing
+     */
+    public void move(Pair<Vector2d, MapDirection> target) {
+        pos = target.first;
+        facing = target.second;
     }
 
     /**
@@ -190,13 +182,5 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
     public String getLabel() {
         // TODO: implement when adding GUI
         return "NOT IMPLEMENTED";
-    }
-
-    public boolean addObserver(IPositionChangeObserver o) {
-        return observers.add(o);
-    }
-
-    public boolean removeObserver(IPositionChangeObserver o) {
-        return observers.remove(o);
     }
 }

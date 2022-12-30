@@ -39,30 +39,30 @@ public class GlobeMapTest {
         m.place(a);
 
         // Regular move
-        assertEquals(new Pair<>(new Vector2d(2, 3), MapDirection.NORTH), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(2, 3), MapDirection.NORTH), m.getMoveTarget(a));
 
         // North pole - get turned around
         when(a.getPosition()).thenReturn(new Vector2d(2, 4));
-        assertEquals(new Pair<>(new Vector2d(2, 4), MapDirection.SOUTH), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(2, 4), MapDirection.SOUTH), m.getMoveTarget(a));
 
         when(a.getFacing()).thenReturn(MapDirection.NORTHWEST);
-        assertEquals(new Pair<>(new Vector2d(2, 4), MapDirection.SOUTHEAST), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(2, 4), MapDirection.SOUTHEAST), m.getMoveTarget(a));
 
         when(a.getPosition()).thenReturn(new Vector2d(0, 4));
-        assertEquals(new Pair<>(new Vector2d(0, 4), MapDirection.SOUTHEAST), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(0, 4), MapDirection.SOUTHEAST), m.getMoveTarget(a));
 
         // South pole - same
         when(a.getPosition()).thenReturn(new Vector2d(0, 0));
         when(a.getFacing()).thenReturn(MapDirection.SOUTHWEST);
-        assertEquals(new Pair<>(new Vector2d(0, 0), MapDirection.NORTHEAST), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(0, 0), MapDirection.NORTHEAST), m.getMoveTarget(a));
 
         // Leaving to the west - wrap around
         when(a.getFacing()).thenReturn(MapDirection.WEST);
-        assertEquals(new Pair<>(new Vector2d(4, 0), MapDirection.WEST), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(4, 0), MapDirection.WEST), m.getMoveTarget(a));
 
         // Leaving to the east - same
         when(a.getPosition()).thenReturn(new Vector2d(4, 0));
         when(a.getFacing()).thenReturn(MapDirection.NORTHEAST);
-        assertEquals(new Pair<>(new Vector2d(0, 1), MapDirection.NORTHEAST), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(0, 1), MapDirection.NORTHEAST), m.getMoveTarget(a));
     }
 }

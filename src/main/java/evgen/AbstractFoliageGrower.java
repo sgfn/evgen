@@ -38,15 +38,6 @@ public abstract class AbstractFoliageGrower implements IFoliageGrower {
     }
 
     @Override
-    public void plantEaten(Vector2d pos) {
-        if (preferredSpots.contains(pos)) {
-            availablePreferredSpots.add(pos);
-        } else {
-            availableRegularSpots.add(pos);
-        }
-    }
-
-    @Override
     public Vector2d getPlantSpot() {
         Vector2d rv = null;
         // 80% chance that a plant will grow at a preferred spot
@@ -59,7 +50,15 @@ public abstract class AbstractFoliageGrower implements IFoliageGrower {
     }
 
     @Override
-    public abstract void animalDiedAt(Vector2d pos);
+    public void plantEaten(Vector2d pos) {
+        if (preferredSpots.contains(pos)) {
+            assert !availablePreferredSpots.contains(pos);
+            availablePreferredSpots.add(pos);
+        } else {
+            assert !availableRegularSpots.contains(pos);
+            availableRegularSpots.add(pos);
+        }
+    }
 
     @Override
     public boolean isPreferred(Vector2d pos) {

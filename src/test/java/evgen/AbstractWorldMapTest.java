@@ -2,8 +2,6 @@ package evgen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -59,7 +57,6 @@ public class AbstractWorldMapTest {
         when(a.getID()).thenReturn(1337);
 
         assertTrue(m.place(a));
-        verify(a).addObserver(m);
         assertTrue(m.animalsByID.containsKey(1337));
         assertTrue(m.animals.containsKey(a.getPosition()));
         assertTrue(m.animals.get(a.getPosition()).contains(a));
@@ -73,7 +70,6 @@ public class AbstractWorldMapTest {
 
         when(b.getPosition()).thenReturn(new Vector2d(3, 3));
         assertTrue(m.place(b));
-        verify(b).addObserver(m);
         assertTrue(m.animalsByID.containsKey(1338));
         assertTrue(m.animals.containsKey(b.getPosition()));
         assertTrue(m.animals.get(b.getPosition()).contains(b));
@@ -132,30 +128,30 @@ public class AbstractWorldMapTest {
         assertEquals(a, m.objectAt(new Vector2d(3, 3)));
     }
 
-    @Test
-    void testAbstractWorldMapPositionChanged() {
-        AbstractWorldMap m = new GlobeMap(rng, s, f);
-        assertThrows(AssertionError.class,
-        () -> m.positionChanged(1337, new Vector2d(1, 1), new Vector2d(2, 2)));
+    // @Test
+    // void testAbstractWorldMapPositionChanged() {
+    //     AbstractWorldMap m = new GlobeMap(rng, s, f);
+    //     assertThrows(AssertionError.class,
+    //     () -> m.positionChanged(1337, new Vector2d(1, 1), new Vector2d(2, 2)));
 
-        Animal a = mock(Animal.class);
-        when(a.getPosition()).thenReturn(new Vector2d(3, 3));
-        when(a.getID()).thenReturn(1337);
-        m.place(a);
+    //     Animal a = mock(Animal.class);
+    //     when(a.getPosition()).thenReturn(new Vector2d(3, 3));
+    //     when(a.getID()).thenReturn(1337);
+    //     m.place(a);
 
-        assertThrows(AssertionError.class,
-        () -> m.positionChanged(1337, new Vector2d(1, 1), new Vector2d(2, 2)));
+    //     assertThrows(AssertionError.class,
+    //     () -> m.positionChanged(1337, new Vector2d(1, 1), new Vector2d(2, 2)));
 
-        Animal b = mock(Animal.class);
-        when(b.getPosition()).thenReturn(new Vector2d(1, 1));
-        when(b.getID()).thenReturn(2001);
-        m.place(b);
+    //     Animal b = mock(Animal.class);
+    //     when(b.getPosition()).thenReturn(new Vector2d(1, 1));
+    //     when(b.getID()).thenReturn(2001);
+    //     m.place(b);
 
-        assertThrows(AssertionError.class,
-        () -> m.positionChanged(1337, new Vector2d(1, 1), new Vector2d(2, 2)));
+    //     assertThrows(AssertionError.class,
+    //     () -> m.positionChanged(1337, new Vector2d(1, 1), new Vector2d(2, 2)));
 
-        m.positionChanged(1337, new Vector2d(3, 3), new Vector2d(2, 2));
-        assertNull(m.objectAt(new Vector2d(3, 3)));
-        assertEquals(a, m.objectAt(new Vector2d(2, 2)));
-    }
+    //     m.positionChanged(1337, new Vector2d(3, 3), new Vector2d(2, 2));
+    //     assertNull(m.objectAt(new Vector2d(3, 3)));
+    //     assertEquals(a, m.objectAt(new Vector2d(2, 2)));
+    // }
 }

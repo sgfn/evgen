@@ -61,10 +61,10 @@ public class ToxicCorpsesGrowerTest {
         assertEquals(5, g.preferredSpots.size());
         assertEquals(5, g.availablePreferredSpots.size());
         assertEquals(20, g.availableRegularSpots.size());
-        // First deleted field will become preferred again
+        // A random field (3, 0) will become preferred again
         assertFalse(g.preferredSpots.contains(new Vector2d(0, 0)));
-        assertTrue(g.preferredSpots.contains(new Vector2d(1, 0)));
-
+        assertTrue(g.preferredSpots.contains(new Vector2d(3, 0)));
+        
         // Bump deaths on x!=0 fields to 2
         for (int x = 1; x < 5; ++x) {
             for (int y = 0; y < 5; ++y) {
@@ -72,16 +72,16 @@ public class ToxicCorpsesGrowerTest {
             }
         }
 
-        // Add a lot of deaths
+        // Add a lot of deaths on (3, 0)
         for (int i = 0; i < 10; ++i) {
-            g.animalDiedAt(new Vector2d(0, 0));
+            g.animalDiedAt(new Vector2d(3, 0));
         }
 
         assertEquals(5, g.preferredSpots.size());
         assertEquals(5, g.availablePreferredSpots.size());
         assertEquals(20, g.availableRegularSpots.size());
-        assertFalse(g.preferredSpots.contains(new Vector2d(0, 0)));
-        assertTrue(g.preferredSpots.contains(new Vector2d(1, 0)));
+        assertFalse(g.preferredSpots.contains(new Vector2d(3, 0)));
+        assertTrue(g.preferredSpots.contains(new Vector2d(0, 0)));
 
         // 0->1 deaths on preferred, shouldn't change anything, max still 2
         g.animalDiedAt(new Vector2d(0, 2));
