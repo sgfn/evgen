@@ -42,28 +42,28 @@ public class PortalMapTest {
         m.place(a);
 
         // Regular move
-        assertEquals(new Pair<>(new Vector2d(2, 3), MapDirection.NORTH), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(2, 3), MapDirection.NORTH), m.getMoveTarget(a));
 
         // Any side - get teleported, lose energy
         when(a.getPosition()).thenReturn(new Vector2d(2, 4));
-        m.positionChanged(a.getID(), new Vector2d(2, 2), new Vector2d(2, 4));
-        assertEquals(new Pair<>(new Vector2d(0, 3), MapDirection.NORTH), m.attemptMove(a));
+        // m.positionChanged(a.getID(), new Vector2d(2, 2), new Vector2d(2, 4));
+        assertEquals(new Pair<>(new Vector2d(0, 0), MapDirection.NORTH), m.getMoveTarget(a));
         verify(a, times(1)).loseEnergy();
 
         when(a.getPosition()).thenReturn(new Vector2d(0, 0));
-        m.positionChanged(a.getID(), new Vector2d(2, 4), new Vector2d(0, 0));
+        // m.positionChanged(a.getID(), new Vector2d(2, 4), new Vector2d(0, 0));
         when(a.getFacing()).thenReturn(MapDirection.SOUTHWEST);
-        assertEquals(new Pair<>(new Vector2d(2, 3), MapDirection.NORTH), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(0, 2), MapDirection.NORTH), m.getMoveTarget(a));
         verify(a, times(2)).loseEnergy();
 
         when(a.getFacing()).thenReturn(MapDirection.WEST);
-        assertEquals(new Pair<>(new Vector2d(1, 2), MapDirection.SOUTHWEST), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(3, 3), MapDirection.SOUTHWEST), m.getMoveTarget(a));
         verify(a, times(3)).loseEnergy();
 
         when(a.getPosition()).thenReturn(new Vector2d(4, 4));
-        m.positionChanged(a.getID(), new Vector2d(0, 0), new Vector2d(4, 4));
+        // m.positionChanged(a.getID(), new Vector2d(0, 0), new Vector2d(4, 4));
         when(a.getFacing()).thenReturn(MapDirection.SOUTHEAST);
-        assertEquals(new Pair<>(new Vector2d(3, 3), MapDirection.NORTHEAST), m.attemptMove(a));
+        assertEquals(new Pair<>(new Vector2d(1, 0), MapDirection.NORTHEAST), m.getMoveTarget(a));
         verify(a, times(4)).loseEnergy();
     }
 }

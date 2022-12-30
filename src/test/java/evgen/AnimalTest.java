@@ -19,17 +19,16 @@ public class AnimalTest {
     private static final IWorldMap m = mock(GlobeMap.class);
 
     private Random rng;
-    private GenotypeMutationIndexGenerator indexGen;
 
     @BeforeAll
     static void setUpOnce() {
         when(s.getGenomeLength()).thenReturn(mockGenomeLength);
     }
-
+    
     @BeforeEach
     void setUp() {
         rng = new Random(rngSeed);
-        indexGen = new GenotypeMutationIndexGenerator(rng);
+        GenotypeMutationIndexGenerator.init(rng);
         when(s.getBehaviourType()).thenReturn(Settings.BehaviourType.PREDESTINED);
         when(s.getMutationType()).thenReturn(Settings.MutationType.STEP);
         when(s.getMinMutations()).thenReturn(0);
@@ -41,10 +40,9 @@ public class AnimalTest {
         Genotype g = mock(Genotype.class);
         when(g.nextDirection()).thenReturn(5);
         Animal a = new Animal(rng, s, m, new Vector2d(2, 2));
-        when(m.attemptMove(a)).thenReturn(new Pair<>(new Vector2d(0, 0), MapDirection.NORTH));
 
         // Assert that animal will move exactly as the map tells it to
-        a.move();
+        a.move(new Pair<Vector2d,MapDirection>(new Vector2d(0, 0), MapDirection.NORTH));
         assertEquals(new Vector2d(0, 0), a.getPosition());
         assertEquals(MapDirection.NORTH, a.getFacing());
     }
@@ -70,9 +68,9 @@ public class AnimalTest {
         when(s.getProcreationEnergyLoss()).thenReturn(30);
         when(s.getStartingEnergy()).thenReturn(50, 50, 10, 40);
 
-        Genotype pg1 = new Genotype(rng, s, indexGen);
+        Genotype pg1 = new Genotype(rng, s);
         assertEquals("0045066526", pg1.toString());
-        Genotype pg2 = new Genotype(rng, s, indexGen);
+        Genotype pg2 = new Genotype(rng, s);
         assertEquals("1164677623", pg2.toString());
 
         Animal pa1 = new Animal(rng, s, m, new Vector2d(2, 2), pg1);

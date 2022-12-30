@@ -4,9 +4,7 @@ import java.util.Random;
 
 public class World {
     public static Random rng;
-    public static GenotypeMutationIndexGenerator indexGen;
-    // XXX: Settings object probably shouldn't be static, because we'll need multiple,
-    // XXX: one for each instance of the simulation
+    // XXX: Settings object probably shouldn't be static, because we'll need multiple, one for each instance of the simulation
     public static final Settings settings = new Settings();
 
     public static void main(String[] args) {
@@ -15,9 +13,9 @@ public class World {
         final long seed = new Random().nextLong();
         System.out.println(String.format("seed: %d", seed));
         rng = new Random(seed);
-        indexGen = new GenotypeMutationIndexGenerator(rng);
+        GenotypeMutationIndexGenerator.init(rng);
 
-        final String configPath = "config/default_config.yaml";
+        final String configPath = "config/sample_config.yaml";
         boolean rc = settings.loadConfig(configPath);
         System.out.println(String.format("Load config file `%s': %s", configPath, rc ? "successful" : "failed!"));
 

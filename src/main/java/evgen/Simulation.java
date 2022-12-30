@@ -15,7 +15,6 @@ public class Simulation implements Runnable {
         settings = s;
         map = (s.getMapType() == Settings.MapType.GLOBE) ? new GlobeMap(r, s) : new PortalMap(r, s);
 
-        // XXX: maybe refactor the following into AbstractWorldMap constructor?
         for (int i = 0; i < s.getStartingAnimals(); ++i) {
             boolean rc = map.place(new Animal(rng, settings, map));
             assert rc;

@@ -18,7 +18,7 @@ public class PortalMap extends AbstractWorldMap {
     }
 
     @Override
-    public Pair<Vector2d, MapDirection> attemptMove(Animal a) {
+    public Pair<Vector2d, MapDirection> getMoveTarget(Animal a) {
         // Leaving map from whichever side
         final Vector2d fromPos = a.getPosition();
         final MapDirection fromDir = a.getFacing();
@@ -26,16 +26,15 @@ public class PortalMap extends AbstractWorldMap {
             (fromPos.y == boundaryUpperRight.y && (fromDir == MapDirection.NORTH || fromDir == MapDirection.NORTHEAST || fromDir == MapDirection.NORTHWEST)) ||
             (fromPos.x == boundaryLowerLeft.x  && (fromDir == MapDirection.WEST  || fromDir == MapDirection.NORTHWEST || fromDir == MapDirection.SOUTHWEST)) ||
             (fromPos.x == boundaryUpperRight.x && (fromDir == MapDirection.EAST  || fromDir == MapDirection.NORTHEAST || fromDir == MapDirection.SOUTHEAST))) {
-            // Hellish portal hurts. Reinsert the animal with updated energy.
-            boolean rc = animals.get(fromPos).remove(a);
-            assert rc;
+            // Hellish portal hurts (this may kill the animal)
             a.loseEnergy();
-            rc = animals.get(fromPos).add(a);
-            assert rc;
+            if (!a.isAlive()) {
+                markForDelete(a);
+            }
 
             return new Pair<>(
-                new Vector2d(rng.nextInt(boundaryLowerLeft.x, boundaryUpperRight.x),
-                             rng.nextInt(boundaryLowerLeft.y, boundaryUpperRight.y)),
+                new Vector2d(rng.nextInt(boundaryLowerLeft.x, boundaryUpperRight.x+1),
+                             rng.nextInt(boundaryLowerLeft.y, boundaryUpperRight.y+1)),
                 MapDirection.fromInt(rng.nextInt(MapDirection.directionCount))
             );
         }

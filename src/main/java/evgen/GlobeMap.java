@@ -18,7 +18,7 @@ public class GlobeMap extends AbstractWorldMap {
     }
 
     @Override
-    public Pair<Vector2d, MapDirection> attemptMove(Animal a) {
+    public Pair<Vector2d, MapDirection> getMoveTarget(Animal a) {
         final Vector2d fromPos = a.getPosition();
         final MapDirection fromDir = a.getFacing();
         // Leaving map to the north/south -- stay in place, change direction

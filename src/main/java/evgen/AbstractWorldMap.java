@@ -9,7 +9,7 @@ import java.util.TreeSet;
 
 import evgen.lib.Pair;
 
-public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
+public abstract class AbstractWorldMap implements IWorldMap {
     // PROTECTED ATTRIBUTES
     protected final Vector2d boundaryLowerLeft;
     protected final Vector2d boundaryUpperRight;
@@ -20,6 +20,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     protected final IFoliageGrower foliageGen;
 
     protected int nextAnimalID = 0;
+    protected int epoch = 0;
     // Can have multiple animals at same spot, but only one plant
     protected Map<Integer, Animal> animalsByID = new HashMap<>();
     protected Map<Vector2d, TreeSet<Animal>> animals = new HashMap<>();
@@ -39,34 +40,36 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
             foliageGen = f;
         }
         mapVis = new MapVisualizer(this, foliageGen);
+        initAnimalStructures();
         growFoliage(settings.getStartingFoliage());
     }
 
-    private void addAnimalToMap(Vector2d pos, Animal animal) {
-        if (animals.containsKey(pos)) {
-            boolean rc = animals.get(pos).add(animal);
-            assert rc;
-        } else {
-            TreeSet<Animal> s = new TreeSet<>();
-            boolean rc = s.add(animal);
-            assert rc;
-            var x = animals.put(pos, s);
-            assert x == null;
+    private void initAnimalStructures() {
+        for (int x = boundaryLowerLeft.x; x <= boundaryUpperRight.x; ++x) {
+            for (int y = boundaryLowerLeft.y; y <= boundaryUpperRight.y; ++y) {
+                animals.put(new Vector2d(x, y), new TreeSet<>());
+            }
         }
-        assert animals.containsKey(pos);
+    }
+
+    private void addAnimalToMap(Vector2d pos, Animal animal) {
+        boolean rc = animals.get(pos).add(animal);
+        assert rc;
         assert animals.get(pos).contains(animal);
     }
 
-    private void removeAnimalFromMap(Animal animal) {
-        final Vector2d pos = animal.getPosition();
-        assert animals.containsKey(pos);
+    private void removeAnimalFromMap(Vector2d pos, Animal animal) {
         assert animals.get(pos).contains(animal);
         final boolean rc = animals.get(pos).remove(animal);
         assert rc;
         assert !animals.get(pos).contains(animal);
     }
 
-    private void markForDelete(Animal a) {
+    private void removeAnimalFromMap(Animal animal) {
+        removeAnimalFromMap(animal.getPosition(), animal);
+    }
+
+    protected void markForDelete(Animal a) {
         markedForDelete.add(a);
     }
 
@@ -77,7 +80,6 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
             Object o = animalsByID.remove(a.getID());
             assert o.equals(a);
             foliageGen.animalDiedAt(a.getPosition());
-            a.removeObserver(this);
             a = null;
         }
         markedForDelete.clear();
@@ -92,61 +94,69 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         deleteMarked();
     }
 
+    /**
+     * Get target position and direction of an animal which is about to move,
+     * according to its genome and map constraints
+     * @param a animal to move
+     * @return pair containing target position and direction, in that order
+     */
+    protected abstract Pair<Vector2d, MapDirection> getMoveTarget(Animal a);
+
     private void moveAll() {
         for (Animal a : animalsByID.values()) {
             assert a.isAlive();
             assert animals.get(a.getPosition()).contains(a) : String.format("moveAll detected desync between animal pos and set, a=%s, s=%s", a, animals.get(a.getPosition()));
-            a.move();
-            // PortalMap: teleportation may kill the animal -- XXX: export only to portalmap
-            if (!a.isAlive()) {
-                markForDelete(a);
-            }
+            a.updateFacing();
+            removeAnimalFromMap(a.getPosition(), a);
+            Pair<Vector2d, MapDirection> target = getMoveTarget(a);
+            a.move(target);
+            addAnimalToMap(target.first, a);
         }
         deleteMarked();
     }
 
     private void feedAndProcreateAll() {
         for (Vector2d spot : animals.keySet()) {
-            // Feed strongest from spot -- this will never change the ordering
-            if (animals.get(spot).size() > 0 && foliage.get(spot) != null) {
-                Animal strongest = animals.get(spot).pollFirst();
+            TreeSet<Animal> s = animals.get(spot);
+            // Feed strongest from spot
+            if (s.size() > 0 && foliage.get(spot) != null) {
+                Animal strongest = s.pollFirst();
                 strongest.eat();
-                animals.get(spot).add(strongest);
+                s.add(strongest);
                 foliage.remove(spot);
                 foliageGen.plantEaten(spot);
             }
             // Allow procreation of two strongest from spot
-            if (animals.get(spot).size() > 1) {
-                Animal first = animals.get(spot).pollFirst();
-                Animal second = animals.get(spot).pollFirst();
-                // assert first == animals.get(spot).first() : "First from iterator is not first from set";
+            if (s.size() > 1) {
+                Animal first = s.pollFirst();
+                Animal second = s.pollFirst();
                 
                 // Second one cannot have more energy than first
-                assert first.getEnergy() >= second.getEnergy() : "Second has more energy than first" + String.format("c=%s s=%s m.p1.e=%d m.p2.e=%d ", spot.toString(), animals.get(spot), first.getEnergy(), second.getEnergy());
+                assert first.getEnergy() >= second.getEnergy() : "Second has more energy than first" + String.format("c=%s s=%s m.p1.e=%d m.p2.e=%d ", spot.toString(), s, first.getEnergy(), second.getEnergy());
                 if (second.canProcreate()) {
-                    Debug.print(String.format("procreation c=%s s=%s ", spot.toString(), animals.get(spot)));
+                    Debug.print(String.format("procreation c=%s s=%s ", spot.toString(), s));
 
                     Animal child = first.procreate(second);
                     // Update positions of both parents in the set
-                    animals.get(spot).add(first);
-                    animals.get(spot).add(second);
+                    s.add(first);
+                    s.add(second);
 
-                    assert animals.get(spot).contains(first) : "Assertion after update for first one failed";
-                    assert animals.get(spot).contains(second) : "Assertion after update for second one failed";
+                    assert s.contains(first) : "Assertion after update for first one failed";
+                    assert s.contains(second) : "Assertion after update for second one failed";
 
                     place(child);
 
-                    assert animals.get(spot).contains(first) : "Assertion after child placement for first one failed";
-                    assert animals.get(spot).contains(second) : "Assertion after child placement for second one failed";
-                    assert animals.get(spot).contains(child) : "Assertion after child placement for child failed";
+                    assert s.contains(first) : "Assertion after child placement for first one failed";
+                    assert s.contains(second) : "Assertion after child placement for second one failed";
+                    assert s.contains(child) : "Assertion after child placement for child failed";
 
-                    Debug.println(String.format("new_s=%s", animals.get(spot)));
+                    Debug.println(String.format("new_s=%s", s));
                 } else {
-                    animals.get(spot).add(first);
-                    animals.get(spot).add(second);
+                    s.add(first);
+                    s.add(second);
 
-                    assert animals.get(spot).contains(first) : "Assertion after update for first one failed";
-                    assert animals.get(spot).contains(second) : "Assertion after update for second one failed";
+                    assert s.contains(first) : "Assertion after update for first one failed";
+                    assert s.contains(second) : "Assertion after update for second one failed";
                 }
             }
         }
@@ -185,115 +195,37 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     }
 
     // PUBLIC METHODS
-    /**
-     * Check whether a given position is in map bounds
-     * @param position position to check
-     * @return true if position is in bounds, false otherwise
-     */
     @Override
     public boolean canPlaceAt(Vector2d position) {
         return boundaryLowerLeft.precedes(position) && boundaryUpperRight.follows(position);
     }
 
-    /**
-     * Attempt to place an animal on the map, at its position
-     * @param animal Animal to place on the map
-     * @return true if the animal was placed successfully, false otherwise
-     */
     @Override
     public boolean place(Animal animal) {
-        if (animal.getID() == 17) animal.pdb = true;
         final Vector2d pos = animal.getPosition();
         if (canPlaceAt(pos)) {
             addAnimalToMap(pos, animal);
             animalsByID.put(animal.getID(), animal);
-            animal.addObserver(this);
             return true;
         }
         return false;
     }
 
-    /**
-     * Check whether a given spot on the map is occupied
-     * @param position position to check
-     * @return true if position is occupied, false otherwise
-     */
     @Override
     public boolean isOccupied(Vector2d position) {
         return objectAt(position) != null;
     }
 
-    /**
-     * Get object present at given spot on the map.
-     * If animals are present at the spot, will return the first one (sorted according to the inner comparator).
-     * If no animals are present, will return the plant at the spot.
-     * If spot does not have a plant, will return null
-     * @param position position to get object from
-     * @return object at given position
-     */
+
     @Override
     public Object objectAt(Vector2d position) {
         TreeSet<Animal> s = animals.get(position);
-        if (s != null && !s.isEmpty()) {
+        if (!s.isEmpty()) {
             return s.first();
         }
         return foliage.get(position);
     }
 
-    @Override
-    public String toString() {
-        return mapVis.draw(boundaryLowerLeft, boundaryUpperRight);
-    }
-
-    /**
-     * Handle position changed event of a certain animal present on the map.
-     * @param entityID ID of the animal that has moved
-     * @param oldPosition previous position of the animal
-     * @param newPosition current position of the animal
-     */
-    @Override
-    public void positionChanged(int entityID, Vector2d oldPosition, Vector2d newPosition) {
-        final Animal a = animalsByID.get(entityID);
-        assert a != null : String.format("Animal with id %d does not exist", entityID);
-        // TreeSet<Animal> s = animals.get(oldPosition);
-        assert animals.get(oldPosition) != null : String.format("positionChanged invoked from pos %s but no animals are present there!", oldPosition);
-        assert animals.get(oldPosition).contains(a) : String.format("Animal with id %d is not present at pos %s", entityID, oldPosition);
-        boolean rc = animals.get(oldPosition).remove(a);
-        assert rc;
-        addAnimalToMap(newPosition, a);
-    }
-
-    /**
-     * Get unique ID for a new animal to be added to the map
-     * @return unique ID for the new animal
-     */
-    @Override
-    public int getNextAnimalID() {
-        return nextAnimalID++;
-    }
-
-    /**
-     * Get target position and direction of an animal who is about to move,
-     * according to its genome and map constraints
-     * @param a animal to move
-     * @return pair containing target position and direction, in that order
-     */
-    @Override
-    public abstract Pair<Vector2d, MapDirection> attemptMove(Animal a);
-
-    /**
-     * Get map boundaries
-     * @return pair containing map lower-left and upper-right boundary, in that order
-     */
-    @Override
-    public Pair<Vector2d, Vector2d> getMapBounds() {
-        return new Pair<>(boundaryLowerLeft, boundaryUpperRight);
-    }
-
-    /**
-     * Advance to next epoch -- age animals up, move them, feed them,
-     * allow procreation, grow foliage
-     */
     @Override
     public void nextEpoch() {
         Debug.println(animalsByID);
@@ -303,8 +235,30 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         feedAndProcreateAll();
         growDailyFoliage();
         ageUpAll();
+        ++epoch;
     }
 
+    @Override
+    public int getNextAnimalID() {
+        return nextAnimalID++;
+    }
+
+    @Override
+    public int getCurrentEpoch() {
+        return epoch;
+    }
+
+    @Override
+    public Pair<Vector2d, Vector2d> getMapBounds() {
+        return new Pair<>(boundaryLowerLeft, boundaryUpperRight);
+    }
+
+    @Override
+    public String toString() {
+        return mapVis.draw(boundaryLowerLeft, boundaryUpperRight);
+    }
+
+    // XXX: delete when not needed anymore
     public void printDebugData() {
         Animal a = animalsByID.get(74);
         Animal b = animalsByID.get(5);
