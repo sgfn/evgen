@@ -17,18 +17,20 @@ public class GlobalStatsDisplay extends VBox {
 
     public GlobalStatsDisplay(StatTracker statTracker) {
         this.statTracker = statTracker;
-        this.getChildren().addAll(epoch, animalCount, foliageCount, freeFieldsCount, mostPopularGenotype, avgEnergyLvl, avgLifeLength);
+        Text header = new Text("Global simulation stats");
+        header.setStyle("-fx-font-size: 14px; -fx-font-weight: bold");
+        this.getChildren().addAll(header, epoch, animalCount, foliageCount, freeFieldsCount, mostPopularGenotype, avgEnergyLvl, avgLifeLength);
         update();
     }
 
     public void update() {
-        epoch.setText("Current epoch: " + statTracker.getEpoch());
-        animalCount.setText("Current animal count: " + statTracker.getAnimalCount());
-        foliageCount.setText("Current foliage count: " + statTracker.getFoliageCount());
-        freeFieldsCount.setText("Current free fields count: " + statTracker.getFreeFieldsCount());
-        mostPopularGenotype.setText("Current most popular genotype: " + statTracker.getMostPopularGenotype().toString());
-        avgEnergyLvl.setText("Current average animal energy level: " + statTracker.getAvgEnergy());
-        avgLifeLength.setText("Current average animal life length: " + statTracker.getAvgLifeLength());
+        epoch.setText("epoch: " + statTracker.getEpoch());
+        animalCount.setText("animal count: " + statTracker.getAnimalCount());
+        foliageCount.setText("foliage count: " + statTracker.getFoliageCount());
+        freeFieldsCount.setText("free fields count: " + statTracker.getFreeFieldsCount());
+        mostPopularGenotype.setText("most popular genotype: " + statTracker.getMostPopularGenotype().toString());
+        avgEnergyLvl.setText("average energy: " + statTracker.getAvgEnergy());
+        avgLifeLength.setText("average lifespan: " + statTracker.getAvgLifeLength());
     }
 
 

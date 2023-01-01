@@ -1,5 +1,6 @@
 package evgen;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -115,6 +116,16 @@ public class Genotype {
             }
         }
         return dir;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return ((obj instanceof Genotype) && Arrays.equals(((Genotype) obj).genome, this.genome));
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(genome);
     }
 
     public int getNextGeneIndex() { return nextGeneIndex; }

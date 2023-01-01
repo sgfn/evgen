@@ -6,9 +6,7 @@ import javafx.animation.Timeline;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
@@ -19,20 +17,16 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
-//public class SimulationWindow {
 public class SimulationWindow implements Runnable {
-
-//    private final Stage stage = new Stage();
-//    private final GridPane globalGrid = new GridPane();
     private final GridPane mapGrid = new GridPane();
     private final VBox statsWrapper = new VBox();
-    private final VBox globalStats = new VBox();
     private final GlobalStatsDisplay globalStatsDisplay;
     private final AnimalStatsDisplay animalStatsDisplay = new AnimalStatsDisplay();
     private final StatTracker statTracker;
@@ -41,9 +35,15 @@ public class SimulationWindow implements Runnable {
     private ImageView selectedAnimalImage;
     private final Settings settings;
     private final Timeline timeline;
-    private final int elementSize = 20;
-    HashMap<String, Image> mapElementImages = new HashMap<>();
+    private final int elementSize = 40;
+    private HashMap<String, Image> mapElementImages = new HashMap<>();
+    private HashSet<Integer> mostPopularGenotypeIDs;
+    private boolean markGenotypes = false;
+
     public SimulationWindow(int simulationID, Settings settings, Random rng, String logDirPath, int millisDelay) {
+        if (!settings.success()) {
+            System.out.println("Configuration loaded unsuccessfully, starting with default settings");
+        }
         this.settings = settings;
         this.statTracker = logDirPath != null ? new StatTracker(logDirPath, simulationID) : new StatTracker();
         statTracker.importSettings(settings);
@@ -54,10 +54,13 @@ public class SimulationWindow implements Runnable {
         }
 
         timeline = new Timeline(new KeyFrame(Duration.millis(millisDelay), ev -> {
+            if (statTracker.getAnimalCount() == 0) {
+                stop();
+            }
             map.nextEpoch();
-//            System.out.println(map.toString());
             renderMap();
             updateStats();
+            mostPopularGenotypeIDs = statTracker.getMostPopularGenotypeIDs();
         }));
         timeline.setCycleCount(Timeline.INDEFINITE);
 
@@ -69,20 +72,48 @@ public class SimulationWindow implements Runnable {
         mapGrid.setBackground(new Background(new BackgroundFill(Color.GREEN, null, null)));
         globalStatsDisplay = new GlobalStatsDisplay(statTracker);
 
+        VBox simulationControlsWrapper = new VBox();
+        HBox simulationButtonsWrapper = new HBox();
+        simulationButtonsWrapper.setSpacing(8);
+        Text simulationButtonsHeader = new Text("Simulation controls");
+        simulationButtonsHeader.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-font-family: 'comic sans ms'");
         Button startButton = new Button("start");
+        startButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: green");
         startButton.setOnAction(e -> timeline.play());
         Button pauseButton = new Button("pause");
+        pauseButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: red");
         pauseButton.setOnAction(e -> timeline.stop());
-        HBox buttonWrapper = new HBox();
-        buttonWrapper.setSpacing(10);
-        buttonWrapper.getChildren().addAll(startButton, pauseButton);
+        simulationButtonsWrapper.getChildren().addAll(startButton, pauseButton);
+        simulationControlsWrapper.getChildren().addAll(simulationButtonsHeader, simulationButtonsWrapper);
+
+
+        VBox genomePopularityWrapper = new VBox();
+        Text genomePopularityHeader = new Text("Animals with most popular genotype");
+        genomePopularityHeader.setStyle("-fx-font-size: 14px; -fx-font-weight: bold");
+        HBox genomeButtonsWrapper = new HBox();
+        genomeButtonsWrapper.setSpacing(8);
+        Button showGenomes = new Button("show");
+        showGenomes.setOnAction(e -> {
+            markGenotypes = true;
+            renderMap();
+        });
+        Button hideGenomes = new Button("hide");
+        hideGenomes.setOnAction(e -> {
+            markGenotypes = false;
+            renderMap();
+        });
+        genomeButtonsWrapper.getChildren().addAll(showGenomes, hideGenomes);
+        genomePopularityWrapper.getChildren().addAll(genomePopularityHeader, genomeButtonsWrapper);
         statsWrapper.setPadding(new Insets(10));
-        statsWrapper.getChildren().addAll(globalStatsDisplay, buttonWrapper, animalStatsDisplay);
+        statsWrapper.setSpacing(10);
+        statsWrapper.getChildren().addAll(simulationControlsWrapper, globalStatsDisplay, animalStatsDisplay, genomePopularityWrapper);
 
         globalGrid.add(statsWrapper, 0, 0, 3, 1);
         globalGrid.add(mapGrid, 3, 0, 4, 1);
         Scene scene = new Scene(globalGrid, elementSize * settings.getMapWidth() * 7 / 4, elementSize * settings.getMapHeight());
         Stage stage = new Stage();
+        stage.setMinHeight(500);
+        stage.setMinWidth(700);
         stage.setTitle("evgen #" + simulationID);
         stage.setScene(scene);
         stage.show();
@@ -90,36 +121,27 @@ public class SimulationWindow implements Runnable {
 
     }
 
+    private void stop() {
+        timeline.stop();
+    }
 
     public void renderMap() {
-        System.out.println("epoch: " + statTracker.getEpoch());
         mapGrid.getChildren().clear();
-        mapGrid.setBackground(new Background(new BackgroundFill(Color.rgb(134, 129, 95), null, null)));
+        mapGrid.setBackground(new Background(new BackgroundFill(Color.rgb(186, 182, 141), null, null)));
         for (int x = 0; x < settings.getMapWidth(); x++) {
             for (int y = 0; y < settings.getMapHeight(); y++) {
+                boolean isPreferred = map.isPreferred(new Vector2d(x, y));
+                StackPane preferredSpot = new StackPane();
+                GridPane.setFillHeight(preferredSpot, true);
+                GridPane.setFillWidth(preferredSpot, true);
                 Object object = map.objectAt(new Vector2d(x, y));
                 if (object != null) {
-//                    System.out.println("object: " + x + " " + y);
-//                    ImageView imageView = new ImageView(image);
-//                    IMapElement element = (IMapElement) object;
-//                    System.out.println("element");
-//                    Image img;
-//                    System.out.println("img");
-//                    try {
-//                        img = new Image(new FileInputStream(element.getResource()));
-//                        System.out.println("new image");
-//                    } catch (FileNotFoundException e) {
-//                        System.out.println("not found");
-//                        return;
-//                    }
-//                    ImageView imageView = new ImageView(img);
                     IMapElement element = (IMapElement) object;
                     ImageView imageView = new ImageView(getMapElementImage(element.getResource()));
-                    System.out.println("imgView");
                     if (object.getClass().equals(Animal.class)) {
                         setAnimalResource(imageView, (Animal) object);
                         if (selectedAnimal != null && selectedAnimal.equals(object)){
-                            markAnimalResource(imageView);
+                            markAnimalAsTracked(imageView);
                             selectedAnimalImage = imageView;
                         }
                         imageView.setOnMouseClicked(e -> {
@@ -134,36 +156,55 @@ public class SimulationWindow implements Runnable {
                                 }
                             }
                             if (!untracked) {
-                                markAnimalResource(imageView);
+                                markAnimalAsTracked(imageView);
                                 selectedAnimal = (Animal) object;
                                 selectedAnimalImage = imageView;
                                 animalStatsDisplay.setAnimal(selectedAnimal);
                             }
                         });
+                        if (markGenotypes && mostPopularGenotypeIDs != null && mostPopularGenotypeIDs.contains(((Animal) object).id)) {
+                            markAnimalAsMostPopular(imageView);
+                        }
                     }
                     GridPane.setHalignment(imageView, HPos.CENTER);
                     GridPane.setValignment(imageView, VPos.CENTER);
                     imageView.setFitWidth(elementSize);
                     imageView.setFitHeight(elementSize);
-                    mapGrid.add(imageView, x, y);
+                    preferredSpot.getChildren().add(imageView);
                 }
+                if (isPreferred) {
+                    preferredSpot.setStyle("-fx-background-color: rgb(148, 144, 111)");
+                }
+                mapGrid.add(preferredSpot, x, y);
             }
         }
     }
 
     public void setAnimalResource(ImageView imageView, Animal animal) {
         ColorAdjust colorAdjust = new ColorAdjust();
-        colorAdjust.setHue(0.3 - 0.05 * (10 - animal.getEnergyLvl()));
-        colorAdjust.setSaturation(1);
-        colorAdjust.setBrightness(0.2);
-        colorAdjust.setContrast(0);
+        colorAdjust.setHue(-0.8);
+        colorAdjust.setSaturation(0.8);
+        colorAdjust.setBrightness(0 - 0.1 * (10 - animal.getEnergyLvl()));
+        colorAdjust.setContrast(1);
         imageView.setEffect(colorAdjust);
         imageView.setRotate(45 * animal.getFacing().facing);
     }
 
-    public void markAnimalResource(ImageView imageView) {
+    public void markAnimalAsTracked(ImageView imageView) {
         ColorAdjust colorAdjust = new ColorAdjust();
-        colorAdjust.setHue(-0.6);
+        colorAdjust.setHue(0);
+        colorAdjust.setSaturation(1);
+        colorAdjust.setBrightness(0);
+        colorAdjust.setContrast(0);
+        imageView.setEffect(colorAdjust);
+    }
+
+    public void markAnimalAsMostPopular(ImageView imageView) {
+        ColorAdjust colorAdjust = new ColorAdjust();
+        colorAdjust.setHue(0.3);
+        colorAdjust.setSaturation(1);
+        colorAdjust.setBrightness(0);
+        colorAdjust.setContrast(0);
         imageView.setEffect(colorAdjust);
     }
 

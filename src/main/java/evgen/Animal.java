@@ -37,7 +37,7 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
         energy = e;
         statTracker = st;
         genes = g;
-        statTracker.addGenotype(g);
+        statTracker.addGenotype(g, id);
     }
 
     public Animal(Random r, Settings s, IWorldMap m, StatTracker st, Vector2d p, Genotype g) {
@@ -53,15 +53,13 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
                                    r.nextInt(m.getMapBounds().first.y, m.getMapBounds().second.y + 1)));
     }
 
-//    public Animal(IWorldMap m, Vector2d p) {
-//        this(World.rng, World.settings, m, p);
-//    }
 
     /**
      * Gain energy as if from eating.
      */
     public void eat() {
         energy += settings.getEnergyGain();
+        statTracker.updateTotalEnergy(settings.getEnergyGain());
         eatenFoliage += 1;
     }
 
@@ -70,7 +68,9 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      */
     public void loseEnergy() {
         energy -= settings.getProcreationEnergyLoss();
-        statTracker.updateTotalEnergy(-settings.getProcreationEnergyLoss());
+        if (energy <= 0) {
+            death();
+        }
     }
 
     /**
@@ -94,8 +94,7 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      * @return true if animal is still alive, false otherwise
      */
     public boolean isAlive() {
-        // return energy > 0;
-        return deathEpoch == null;
+         return energy > 0;
     }
 
     /**
@@ -104,7 +103,11 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      */
     public boolean ageUp() {
         ++age;
-        statTracker.updateTotalEnergy(--energy);
+        energy--;
+        statTracker.updateTotalEnergy(-1);
+        if (energy <= 0) {
+            death();
+        }
         return energy > 0;
     }
 
@@ -140,9 +143,9 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
     public int getAge() { return age; }
     public int getID() { return id; }
     public int getDeathEpoch() { return deathEpoch; }
-    public void death(int epoch) {
-        deathEpoch = epoch;
-        statTracker.animalDied(age);
+    public void death() {
+        deathEpoch = statTracker.getEpoch();
+        statTracker.animalDied(this);
     }
 
     @Override

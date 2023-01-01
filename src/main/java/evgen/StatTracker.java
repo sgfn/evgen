@@ -10,7 +10,7 @@ public class StatTracker {
     private int animalCount = 0;
     private int foliageCount = 0;
     private int freeFieldsCount = 0;
-    private final HashMap<Genotype, Integer> genotypePopularity = new HashMap<>();
+    private final HashMap<Genotype, HashSet<Integer>> genotypePopularity = new HashMap<>();
     private int totalEnergy = 0;
     private int totalLifeLength = 0;
     private int deathCount = 0;
@@ -36,7 +36,6 @@ public class StatTracker {
 
     public void nextEpoch() {
         epoch++;
-        totalEnergy = 0;
     }
     public void setAnimalCount(int animalCount) {
         this.animalCount = animalCount;
@@ -50,17 +49,25 @@ public class StatTracker {
         this.freeFieldsCount = freeFieldsCount;
     }
 
-    public void addGenotype(Genotype genotype) {
-        genotypePopularity.put(genotype, genotypePopularity.getOrDefault(genotype, 0) + 1);
+    public void addGenotype(Genotype genotype, int animalID) {
+        HashSet<Integer> list = genotypePopularity.get(genotype);
+        if (list == null) {
+            list = new HashSet<>();
+            list.add(animalID);
+            genotypePopularity.put(genotype, list);
+        } else {
+            genotypePopularity.get(genotype).add(animalID);
+        }
     }
 
     public void updateTotalEnergy(int energy) {
         this.totalEnergy += energy;
     }
 
-    public void animalDied(int lifeLength) {
+    public void animalDied(Animal animal) {
         deathCount += 1;
-        totalLifeLength += lifeLength;
+        totalLifeLength += animal.getAge();
+        genotypePopularity.get(animal.genes).remove(animal.id);
     }
 
     public int getAnimalCount() {
@@ -80,21 +87,25 @@ public class StatTracker {
     }
 
     public Genotype getMostPopularGenotype() {
-        Map.Entry<Genotype, Integer> max = null;
-        for (Map.Entry<Genotype, Integer> entry : genotypePopularity.entrySet()) {
-            if (max == null || max.getValue() < entry.getValue()) {
+        Map.Entry<Genotype, HashSet<Integer>> max = null;
+        for (Map.Entry<Genotype, HashSet<Integer>> entry : genotypePopularity.entrySet()) {
+            if (max == null || max.getValue().size() < entry.getValue().size()) {
                 max = entry;
             }
         }
-        return (max == null) ? null : max.getKey();
+        return max == null ? null : max.getKey();
+    }
+
+    public HashSet<Integer> getMostPopularGenotypeIDs() {
+        return genotypePopularity.get(getMostPopularGenotype());
     }
 
     public double getAvgEnergy() {
-        return (double)totalEnergy / animalCount;
+        return Math.round(100.0 * totalEnergy / animalCount) / 100.0;
     }
 
     public double getAvgLifeLength() {
-        return (double)totalLifeLength / deathCount;
+        return Math.round(100.0 * totalLifeLength / deathCount) / 100.0;
     }
 
     public void logEpoch() {

@@ -1,11 +1,6 @@
 package evgen;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeSet;
+import java.util.*;
 
 import evgen.lib.Pair;
 
@@ -82,8 +77,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
             Object o = animalsByID.remove(a.getID());
             assert o.equals(a);
             foliageGen.animalDiedAt(a.getPosition());
-            // a.removeObserver(this);
-            a.death(epoch);
+            a.death();
             a = null;
         }
         markedForDelete.clear();
@@ -269,5 +263,9 @@ public abstract class AbstractWorldMap implements IWorldMap {
     @Override
     public String toString() {
         return mapVis.draw(boundaryLowerLeft, boundaryUpperRight);
+    }
+
+    public boolean isPreferred(Vector2d position) {
+        return foliageGen.isPreferred(position);
     }
 }

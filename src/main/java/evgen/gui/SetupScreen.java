@@ -144,15 +144,18 @@ public class SetupScreen {
                 csvDirectory = selectCsv.showDialog(this.stage);
                 if (csvDirectory != null) {
                     csvPath.setText(csvDirectory.getName());
+                    startSimulation.setDisable(false);
                 } else {
                     csvPath.setText("invalid directory name!");
                     Alert wrongPathAlert = new Alert(Alert.AlertType.ERROR);
                     wrongPathAlert.setTitle("path problem");
                     wrongPathAlert.setContentText("the file you have chosen does not exist!");
                     wrongPathAlert.show();
+                    startSimulation.setDisable(true);
                 }
                 csvWrapper.getChildren().add(changeCsvDirectory);
             } else {
+                startSimulation.setDisable(false);
                 csvDirectory = null;
                 csvPath.setText("");
                 csvWrapper.getChildren().remove(changeCsvDirectory);
@@ -175,18 +178,27 @@ public class SetupScreen {
         HBox delayWrapper = new HBox();
         Label setDelay = new Label("set simulation delay: ");
         TextField delayValue = new TextField("1000");
+        delayValue.setOnAction (e -> {
+            if (Integer.valueOf(delayValue.getText()) < 50) {
+                startSimulation.setDisable(true);
+            } else {
+                startSimulation.setDisable(false);
+            }
+        });
         delayWrapper.getChildren().addAll(setDelay, delayValue);
 
 
         startSimulation.setOnAction(ev -> {
-            Thread simulationWindow = new Thread(new SimulationWindow(simulationCount++, new Settings(customConfigSelected ? customConfig.getAbsolutePath() : presetConfig.getAbsolutePath()), new Random(), csvDirectory != null ? csvDirectory.getAbsolutePath() : null, Integer.valueOf(delayValue.getText())));
-            simulationWindow.start();
+            if (Integer.valueOf(delayValue.getText()) >= 50) {
+                Thread simulationWindow = new Thread(new SimulationWindow(simulationCount++, new Settings(customConfigSelected ? customConfig.getAbsolutePath() : presetConfig.getAbsolutePath()), new Random(), csvDirectory != null ? csvDirectory.getAbsolutePath() : null, Integer.valueOf(delayValue.getText())));
+                simulationWindow.start();
+            }
         });
 
 
         wrapper.getChildren().addAll(configTypeWrapper, presetConfigWrapper, customConfigWrapper, csvWrapper, delayWrapper, startSimulation);
 
-        Scene scene = new Scene(wrapper, 600, 600);
+        Scene scene = new Scene(wrapper, 600, 200);
         try {
             this.stage.getIcons().add(new Image(new FileInputStream("src/main/resources/icon.png")));
         } catch (FileNotFoundException e) {
