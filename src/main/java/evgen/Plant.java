@@ -19,13 +19,7 @@ public class Plant extends AbstractMapElement {
 
     @Override
     public String getResource() {
-        // TODO: implement when adding GUI
-        return "NOT IMPLEMENTED";
+        return "src/main/resources/plant.png";
     }
 
-    @Override
-    public String getLabel() {
-        // TODO: implement when adding GUI
-        return "NOT IMPLEMENTED";
-    }
 }

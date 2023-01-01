@@ -1,0 +1,20 @@
+# This is an evgen configuration file.
+# Refer to config/README.md for more info.
+
+map_width: 5
+map_height: 5
+starting_foliage: 20
+energy_gain: 20
+daily_foliage_growth: 5
+starting_animals: 20
+starting_energy: 100
+min_procreation_energy: 65
+procreation_energy_loss: 50
+min_mutations: 0
+max_mutations: 1
+genome_length: 1
+
+map_variant: portal
+foliage_variant: toxic
+mutation_variant: step
+behaviour_variant: crazy

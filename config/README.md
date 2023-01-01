@@ -37,12 +37,12 @@ If loading of custom config fails, simulation will use default settings, which c
 # This is an evgen configuration file.
 # Refer to config/README.md for more info.
 
-map_width: 20
+map_width: 15
 map_height: 10
 starting_foliage: 10
 energy_gain: 5
 daily_foliage_growth: 3
-starting_animals: 5
+starting_animals: 20
 starting_energy: 30
 min_procreation_energy: 15
 procreation_energy_loss: 10

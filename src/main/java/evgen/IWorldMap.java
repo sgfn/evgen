@@ -57,4 +57,10 @@ public interface IWorldMap {
      * @return current epoch
      */
     int getCurrentEpoch();
+
+    /**
+     * Get info if spot is preferred
+     * @return boolean if spot is preferred
+     */
+    boolean isPreferred(Vector2d position);
 }

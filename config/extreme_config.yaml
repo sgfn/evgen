@@ -1,10 +1,10 @@
 # This is an evgen configuration file.
 # Refer to config/README.md for more info.
 
-map_width: 50
-map_height: 50
+map_width: 30
+map_height: 30
 starting_foliage: 5000
-energy_gain: 5000
+energy_gain: 5
 daily_foliage_growth: 5000
 starting_animals: 100
 starting_energy: 5000

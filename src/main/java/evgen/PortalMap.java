@@ -5,17 +5,17 @@ import java.util.Random;
 import evgen.lib.Pair;
 
 public class PortalMap extends AbstractWorldMap {
-    public PortalMap(Random r, Settings s, IFoliageGrower f) {
-        super(r, s, f);
+    public PortalMap(Random r, Settings s, StatTracker st, IFoliageGrower f) {
+        super(r, s, st, f);
     }
 
-    public PortalMap(Random r, Settings s) {
-        super(r, s);
+    public PortalMap(Random r, Settings s, StatTracker st) {
+        super(r, s, st);
     }
 
-    public PortalMap() {
-        this(World.rng, World.settings);
-    }
+//    public PortalMap() {
+//        this(World.rng, World.settings);
+//    }
 
     @Override
     public Pair<Vector2d, MapDirection> getMoveTarget(Animal a) {

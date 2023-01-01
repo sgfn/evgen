@@ -1,11 +1,6 @@
 package evgen;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeSet;
+import java.util.*;
 
 import evgen.lib.Pair;
 
@@ -18,6 +13,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
     protected final Settings settings;
     protected final MapVisualizer mapVis;
     protected final IFoliageGrower foliageGen;
+    protected final StatTracker statTracker;
 
     protected int nextAnimalID = 0;
     protected int epoch = 0;
@@ -29,13 +25,14 @@ public abstract class AbstractWorldMap implements IWorldMap {
     protected List<Animal> markedForDelete = new LinkedList<>();
 
     // PRIVATE METHODS
-    private AbstractWorldMap(Random r, Settings s, IFoliageGrower f, boolean useDefaultGrowers) {
+    private AbstractWorldMap(Random r, Settings s, StatTracker st, IFoliageGrower f, boolean useDefaultGrowers) {
         rng = r;
         settings = s;
+        statTracker = st;
         boundaryLowerLeft = new Vector2d(0, 0);
         boundaryUpperRight = new Vector2d(settings.getMapWidth()-1, settings.getMapHeight()-1);
         if (useDefaultGrowers) {
-            foliageGen = (s.getFoliageGrowthType() == Settings.FoliageGrowthType.EQUATOR) ? new EquatorialGrower(this) : new ToxicCorpsesGrower(this);
+            foliageGen = (s.getFoliageGrowthType() == Settings.FoliageGrowthType.EQUATOR) ? new EquatorialGrower(r, s, this) : new ToxicCorpsesGrower(r, s, this);
         } else {
             foliageGen = f;
         }
@@ -80,6 +77,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
             Object o = animalsByID.remove(a.getID());
             assert o.equals(a);
             foliageGen.animalDiedAt(a.getPosition());
+            a.death();
             a = null;
         }
         markedForDelete.clear();
@@ -174,12 +172,12 @@ public abstract class AbstractWorldMap implements IWorldMap {
     }
 
     // PROTECTED METHODS
-    protected AbstractWorldMap(Random r, Settings s, IFoliageGrower f) {
-        this(r, s, f, false);
+    protected AbstractWorldMap(Random r, Settings s, StatTracker st, IFoliageGrower f) {
+        this(r, s, st, f, false);
     }
 
-    protected AbstractWorldMap(Random r, Settings s) {
-        this(r, s, null, true);
+    protected AbstractWorldMap(Random r, Settings s, StatTracker st) {
+        this(r, s, st, null, true);
     }
 
     protected void growFoliage(int amount) {
@@ -192,6 +190,12 @@ public abstract class AbstractWorldMap implements IWorldMap {
             Plant p = new Plant(spot);
             foliage.put(p.getPosition(), p);
         }
+    }
+
+    protected void updateEpochStats() {
+        statTracker.setAnimalCount(animalsByID.size());
+        statTracker.setFoliageCount(foliage.size());
+        statTracker.setFreeFieldsCount(foliageGen.getFreeSpotsCount());
     }
 
     // PUBLIC METHODS
@@ -230,12 +234,15 @@ public abstract class AbstractWorldMap implements IWorldMap {
     public void nextEpoch() {
         Debug.println(animalsByID);
         Debug.println(animals);
+        ++epoch;
+        statTracker.nextEpoch();
         cleanUpAll();
         moveAll();
         feedAndProcreateAll();
         growDailyFoliage();
         ageUpAll();
-        ++epoch;
+        updateEpochStats();
+        statTracker.logEpoch();
     }
 
     @Override
@@ -258,16 +265,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
         return mapVis.draw(boundaryLowerLeft, boundaryUpperRight);
     }
 
-    // XXX: delete when not needed anymore
-    public void printDebugData() {
-        Animal a = animalsByID.get(74);
-        Animal b = animalsByID.get(5);
-        TreeSet<Animal> s = animals.get(new Vector2d(9, 13));
-        Debug.println(a.toString() + s.contains(a));
-        Debug.println(b.toString() + s.contains(b));
-        for (var elem : s) {
-            Debug.println(elem.toString() +" "+ elem.compareTo(a) +" "+ elem.compareTo(b));
-        }
-        Debug.println("");
+    public boolean isPreferred(Vector2d position) {
+        return foliageGen.isPreferred(position);
     }
 }

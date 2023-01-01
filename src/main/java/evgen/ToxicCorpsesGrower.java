@@ -21,9 +21,9 @@ public class ToxicCorpsesGrower extends AbstractFoliageGrower {
         super(r, s, m);
     }
 
-    public ToxicCorpsesGrower(IWorldMap m) {
-        this(World.rng, World.settings, m);
-    }
+    // public ToxicCorpsesGrower(IWorldMap m) {
+    //     this(World.rng, World.settings, m);
+    // }
 
     @Override
     public void animalDiedAt(Vector2d pos) {

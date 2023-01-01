@@ -21,12 +21,6 @@ public interface IMapElement {
     String getResource();
 
     /**
-     * Get label of map element to display in the GUI
-     * @return label
-     */
-    String getLabel();
-
-    /**
      * Get textual representation of map element to display in the TUI
      * @return sprite
      */
