@@ -38,9 +38,9 @@ public class Genotype {
      * Create a new genotype -- length, mutation variant and behaviour variant
      * as in the global settings; use global RNG
      */
-    public Genotype() {
-        this(World.rng, World.settings);
-    }
+    // public Genotype() {
+    //     this(World.rng, World.settings);
+    // }
 
     /**
      * Create a child's genome from two parent's genomes

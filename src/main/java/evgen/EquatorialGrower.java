@@ -28,9 +28,9 @@ public class EquatorialGrower extends AbstractFoliageGrower {
         super(r, s, m);
     }
 
-    public EquatorialGrower(IWorldMap m) {
-        this(World.rng, World.settings, m);
-    }
+    // public EquatorialGrower(IWorldMap m) {
+    //     this(World.rng, World.settings, m);
+    // }
 
     public void animalDiedAt(Vector2d pos) {};
 }

@@ -9,6 +9,8 @@ public class World {
     public static Random rng;
 
     public static void main(String[] args) {
+        rng = new Random();
+        GenotypeMutationIndexGenerator.init(rng);
         Application.launch(App.class, args);
     }
 }

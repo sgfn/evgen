@@ -37,7 +37,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
         boundaryLowerLeft = new Vector2d(0, 0);
         boundaryUpperRight = new Vector2d(settings.getMapWidth()-1, settings.getMapHeight()-1);
         if (useDefaultGrowers) {
-            foliageGen = (s.getFoliageGrowthType() == Settings.FoliageGrowthType.EQUATOR) ? new EquatorialGrower(this) : new ToxicCorpsesGrower(this);
+            foliageGen = (s.getFoliageGrowthType() == Settings.FoliageGrowthType.EQUATOR) ? new EquatorialGrower(r, s, this) : new ToxicCorpsesGrower(r, s, this);
         } else {
             foliageGen = f;
         }
