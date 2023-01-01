@@ -5,17 +5,17 @@ import java.util.Random;
 import evgen.lib.Pair;
 
 public class GlobeMap extends AbstractWorldMap {
-    public GlobeMap(Random r, Settings s, IFoliageGrower f) {
-        super(r, s, f);
+    public GlobeMap(Random r, Settings s, StatTracker st, IFoliageGrower f) {
+        super(r, s, st, f);
     }
 
-    public GlobeMap(Random r, Settings s) {
-        super(r, s);
+    public GlobeMap(Random r, Settings s, StatTracker st) {
+        super(r, s, st);
     }
 
-    public GlobeMap() {
-        this(World.rng, World.settings);
-    }
+//    public GlobeMap() {
+//        this(World.rng, World.settings);
+//    }
 
     @Override
     public Pair<Vector2d, MapDirection> getMoveTarget(Animal a) {

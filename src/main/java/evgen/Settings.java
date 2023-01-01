@@ -56,6 +56,7 @@ public class Settings {
         try {
             inputStream = new FileInputStream(new File(configPath));
         } catch (FileNotFoundException e) {
+            System.out.println("config load error");
             return false;
         }
         Yaml yaml = new Yaml();

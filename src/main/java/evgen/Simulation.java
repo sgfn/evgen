@@ -6,17 +6,19 @@ public class Simulation implements Runnable {
     // PRIVATE ATTRIBUTES
     private final Random rng;
     private final Settings settings;
-    private final IWorldMap map;
+    public final IWorldMap map;
     private final int epochDelay;
+    private final StatTracker statTracker;
 
     // PUBLIC METHODS
-    public Simulation(Random r, Settings s, int epochDelay) {
+    public Simulation(Random r, Settings s, StatTracker statTracker, int epochDelay) {
         rng = r;
         settings = s;
-        map = (s.getMapType() == Settings.MapType.GLOBE) ? new GlobeMap(r, s) : new PortalMap(r, s);
+        this.statTracker = statTracker;
+        map = (s.getMapType() == Settings.MapType.GLOBE) ? new GlobeMap(r, s, statTracker) : new PortalMap(r, s, statTracker);
 
         for (int i = 0; i < s.getStartingAnimals(); ++i) {
-            boolean rc = map.place(new Animal(rng, settings, map));
+            boolean rc = map.place(new Animal(rng, settings, map, statTracker));
             assert rc;
         }
 
@@ -27,6 +29,7 @@ public class Simulation implements Runnable {
     public void run() {
         int epoch = 0;
         System.out.println(String.format("epoch %d\n%s", epoch, map));
+        statTracker.importSettings(settings);
         while (true) {
             try {
                 Thread.sleep(epochDelay);
@@ -34,9 +37,8 @@ public class Simulation implements Runnable {
                 System.out.println("Simulation interrupted.");
                 return;
             }
-
             map.nextEpoch();
-            System.out.println(String.format("epoch %d\n%s", ++epoch, map));
+//            System.out.println(String.format("epoch %d\n%s", ++epoch, map));
         }
     }
 }

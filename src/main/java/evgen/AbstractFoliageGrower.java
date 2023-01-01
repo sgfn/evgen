@@ -37,6 +37,11 @@ public abstract class AbstractFoliageGrower implements IFoliageGrower {
         availableRegularSpots.removeAll(preferredSpots);
     }
 
+    public int getFreeSpotsCount() {
+//        System.out.println("map size: " + settings.getMapWidth() * settings.getMapHeight() + ", available regular spots: " + availableRegularSpots.size() + ", available preferred spots: " + availablePreferredSpots.size());
+        return availableRegularSpots.size() + availablePreferredSpots.size();
+    }
+
     @Override
     public Vector2d getPlantSpot() {
         Vector2d rv = null;

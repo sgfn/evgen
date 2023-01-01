@@ -1,5 +1,7 @@
 package evgen;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import evgen.lib.ConsoleColour;
@@ -15,13 +17,17 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
     private int energy;
     private int age = 0;
     private int children = 0;
+    private int eatenFoliage = 0;
+    private List<IPositionChangeObserver> observers = new LinkedList<>();
+    private StatTracker statTracker;
+    private Integer deathEpoch = null;
 
     // PUBLIC ATTRIBUTES
     public final int id;
     public final Genotype genes;
 
     // PUBLIC METHODS
-    public Animal(Random r, Settings s, IWorldMap m, Vector2d p, Genotype g, int e) {
+    public Animal(Random r, Settings s, IWorldMap m, StatTracker st, Vector2d p, Genotype g, int e) {
         rng = r;
         settings = s;
         map = m;
@@ -29,31 +35,34 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
         id = map.getNextAnimalID();
         facing = MapDirection.fromInt(rng.nextInt(MapDirection.directionCount));
         energy = e;
+        statTracker = st;
         genes = g;
+        statTracker.addGenotype(g);
     }
 
-    public Animal(Random r, Settings s, IWorldMap m, Vector2d p, Genotype g) {
-        this(r, s, m, p, g, s.getStartingEnergy());
+    public Animal(Random r, Settings s, IWorldMap m, StatTracker st, Vector2d p, Genotype g) {
+        this(r, s, m, st, p, g, s.getStartingEnergy());
     }
 
-    public Animal(Random r, Settings s, IWorldMap m, Vector2d p) {
-        this(r, s, m, p, new Genotype(r, s));
+    public Animal(Random r, Settings s, IWorldMap m, StatTracker st, Vector2d p) {
+        this(r, s, m, st, p, new Genotype(r, s));
     }
 
-    public Animal(Random r, Settings s, IWorldMap m) {
-        this(r, s, m, new Vector2d(r.nextInt(m.getMapBounds().first.x, m.getMapBounds().second.x + 1),
+    public Animal(Random r, Settings s, IWorldMap m, StatTracker st) {
+        this(r, s, m, st, new Vector2d(r.nextInt(m.getMapBounds().first.x, m.getMapBounds().second.x + 1),
                                    r.nextInt(m.getMapBounds().first.y, m.getMapBounds().second.y + 1)));
     }
 
-    public Animal(IWorldMap m, Vector2d p) {
-        this(World.rng, World.settings, m, p);
-    }
+//    public Animal(IWorldMap m, Vector2d p) {
+//        this(World.rng, World.settings, m, p);
+//    }
 
     /**
      * Gain energy as if from eating.
      */
     public void eat() {
         energy += settings.getEnergyGain();
+        eatenFoliage += 1;
     }
 
     /**
@@ -61,6 +70,7 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      */
     public void loseEnergy() {
         energy -= settings.getProcreationEnergyLoss();
+        statTracker.updateTotalEnergy(-settings.getProcreationEnergyLoss());
     }
 
     /**
@@ -84,7 +94,8 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      * @return true if animal is still alive, false otherwise
      */
     public boolean isAlive() {
-        return energy > 0;
+        // return energy > 0;
+        return deathEpoch == null;
     }
 
     /**
@@ -93,8 +104,8 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
      */
     public boolean ageUp() {
         ++age;
-        --energy;
-        return isAlive();
+        statTracker.updateTotalEnergy(--energy);
+        return energy > 0;
     }
 
     /**
@@ -119,14 +130,20 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
         other.loseEnergy();
         ++this.children;
         ++other.children;
-        return new Animal(rng, settings, map, pos, childGenes, 2*settings.getProcreationEnergyLoss());
+        return new Animal(rng, settings, map, statTracker, pos, childGenes, 2*settings.getProcreationEnergyLoss());
     }
 
     public MapDirection getFacing() { return facing; }
     public int getEnergy() { return energy; }
     public int getChildren() { return children; }
+    public  int getEatenFoliage() { return eatenFoliage; }
     public int getAge() { return age; }
     public int getID() { return id; }
+    public int getDeathEpoch() { return deathEpoch; }
+    public void death(int epoch) {
+        deathEpoch = epoch;
+        statTracker.animalDied(age);
+    }
 
     @Override
     public String toString() {
@@ -174,13 +191,19 @@ public class Animal extends AbstractMapElement implements Comparable<Animal> {
 
     @Override
     public String getResource() {
-        // TODO: implement when adding GUI
-        return "NOT IMPLEMENTED";
+        return "src/main/resources/animal.png";
     }
 
-    @Override
-    public String getLabel() {
-        // TODO: implement when adding GUI
-        return "NOT IMPLEMENTED";
+    public int getEnergyLvl() {
+        double ratio = 10.0 * energy / settings.getMinProcreationEnergy();
+        return ratio >= 10 ? 10 : (int) Math.round(ratio);
+    }
+
+    public boolean addObserver(IPositionChangeObserver o) {
+        return observers.add(o);
+    }
+
+    public boolean removeObserver(IPositionChangeObserver o) {
+        return observers.remove(o);
     }
 }

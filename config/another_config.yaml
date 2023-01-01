@@ -1,10 +1,7 @@
-# This is an evgen configuration file.
-# Refer to config/README.md for more info.
-
-map_width: 15
+map_width: 20
 map_height: 10
 starting_foliage: 10
-energy_gain: 5
+energy_gain: 2
 daily_foliage_growth: 2
 starting_animals: 10
 starting_energy: 30
@@ -14,7 +11,7 @@ min_mutations: 0
 max_mutations: 5
 genome_length: 10
 
-map_variant: portal
-foliage_variant: toxic
+map_variant: globe
+foliage_variant: equator
 mutation_variant: random
 behaviour_variant: predestined

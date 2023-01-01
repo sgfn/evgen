@@ -25,4 +25,5 @@ public interface IFoliageGrower {
      * @return true if spot is preferred, false otherwise
      */
     boolean isPreferred(Vector2d pos);
+    int getFreeSpotsCount();
 }
