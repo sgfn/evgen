@@ -19,14 +19,12 @@ import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
 public class SimulationWindow implements Runnable {
     private final GridPane mapGrid = new GridPane();
-    private final VBox statsWrapper = new VBox();
     private final GlobalStatsDisplay globalStatsDisplay;
     private final AnimalStatsDisplay animalStatsDisplay = new AnimalStatsDisplay();
     private final StatTracker statTracker;
@@ -34,17 +32,20 @@ public class SimulationWindow implements Runnable {
     private Animal selectedAnimal;
     private ImageView selectedAnimalImage;
     private final Settings settings;
-    private final Timeline timeline;
-    private final int elementSize = 40;
-    private HashMap<String, Image> mapElementImages = new HashMap<>();
+    private final Timeline timeline = new Timeline();
+    private final int mapWidth = 800;
+    private final int mapHeight = 800;
+    private final HashMap<String, Image> mapElementImages = new HashMap<>();
     private HashSet<Integer> mostPopularGenotypeIDs;
     private boolean markGenotypes = false;
+    private final int millisDelay;
 
     public SimulationWindow(int simulationID, Settings settings, Random rng, String logDirPath, int millisDelay) {
         if (!settings.success()) {
             System.out.println("Configuration loaded unsuccessfully, starting with default settings");
         }
         this.settings = settings;
+        this.millisDelay = millisDelay;
         this.statTracker = logDirPath != null ? new StatTracker(logDirPath, simulationID) : new StatTracker();
         statTracker.importSettings(settings);
         map = (settings.getMapType() == Settings.MapType.GLOBE) ? new GlobeMap(rng, settings, statTracker) : new PortalMap(rng, settings, statTracker);
@@ -52,17 +53,6 @@ public class SimulationWindow implements Runnable {
         for (int i = 0; i < settings.getStartingAnimals(); ++i) {
             map.place(new Animal(rng, settings, map, statTracker));
         }
-
-        timeline = new Timeline(new KeyFrame(Duration.millis(millisDelay), ev -> {
-            if (statTracker.getAnimalCount() == 0) {
-                stop();
-            }
-            map.nextEpoch();
-            renderMap();
-            updateStats();
-            mostPopularGenotypeIDs = statTracker.getMostPopularGenotypeIDs();
-        }));
-        timeline.setCycleCount(Timeline.INDEFINITE);
 
 
         GridPane globalGrid = new GridPane();
@@ -72,7 +62,9 @@ public class SimulationWindow implements Runnable {
         mapGrid.setBackground(new Background(new BackgroundFill(Color.GREEN, null, null)));
         globalStatsDisplay = new GlobalStatsDisplay(statTracker);
 
+        //global simulation controls
         VBox simulationControlsWrapper = new VBox();
+        simulationControlsWrapper.setSpacing(10);
         HBox simulationButtonsWrapper = new HBox();
         simulationButtonsWrapper.setSpacing(8);
         Text simulationButtonsHeader = new Text("Simulation controls");
@@ -86,8 +78,9 @@ public class SimulationWindow implements Runnable {
         simulationButtonsWrapper.getChildren().addAll(startButton, pauseButton);
         simulationControlsWrapper.getChildren().addAll(simulationButtonsHeader, simulationButtonsWrapper);
 
-
+        //genome popularity display controls
         VBox genomePopularityWrapper = new VBox();
+        genomePopularityWrapper.setSpacing(10);
         Text genomePopularityHeader = new Text("Animals with most popular genotype");
         genomePopularityHeader.setStyle("-fx-font-size: 14px; -fx-font-weight: bold");
         HBox genomeButtonsWrapper = new HBox();
@@ -104,16 +97,16 @@ public class SimulationWindow implements Runnable {
         });
         genomeButtonsWrapper.getChildren().addAll(showGenomes, hideGenomes);
         genomePopularityWrapper.getChildren().addAll(genomePopularityHeader, genomeButtonsWrapper);
+
+        VBox statsWrapper = new VBox();
         statsWrapper.setPadding(new Insets(10));
-        statsWrapper.setSpacing(10);
+        statsWrapper.setSpacing(20);
         statsWrapper.getChildren().addAll(simulationControlsWrapper, globalStatsDisplay, animalStatsDisplay, genomePopularityWrapper);
 
         globalGrid.add(statsWrapper, 0, 0, 3, 1);
         globalGrid.add(mapGrid, 3, 0, 4, 1);
-        Scene scene = new Scene(globalGrid, elementSize * settings.getMapWidth() * 7 / 4, elementSize * settings.getMapHeight());
+        Scene scene = new Scene(globalGrid, mapWidth / 4 * 7, mapHeight);
         Stage stage = new Stage();
-        stage.setMinHeight(500);
-        stage.setMinWidth(700);
         stage.setTitle("evgen #" + simulationID);
         stage.setScene(scene);
         stage.show();
@@ -168,8 +161,8 @@ public class SimulationWindow implements Runnable {
                     }
                     GridPane.setHalignment(imageView, HPos.CENTER);
                     GridPane.setValignment(imageView, VPos.CENTER);
-                    imageView.setFitWidth(elementSize);
-                    imageView.setFitHeight(elementSize);
+                    imageView.setFitWidth(Math.min((double) mapWidth / settings.getMapWidth(), (double) mapHeight / settings.getMapHeight()));
+                    imageView.setFitHeight(Math.min((double) mapWidth / settings.getMapWidth(), (double) mapHeight / settings.getMapHeight()));
                     preferredSpot.getChildren().add(imageView);
                 }
                 if (isPreferred) {
@@ -210,6 +203,16 @@ public class SimulationWindow implements Runnable {
 
     @Override
     public void run() {
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(millisDelay), ev -> {
+            if (statTracker.getAnimalCount() == 0) {
+                stop();
+            }
+            map.nextEpoch();
+            renderMap();
+            updateStats();
+            mostPopularGenotypeIDs = statTracker.getMostPopularGenotypeIDs();
+        }));
+        timeline.setCycleCount(Timeline.INDEFINITE);
     }
 
     private void setupGrid(GridPane grid, Vector2d dimensions) {
