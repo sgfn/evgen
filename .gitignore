@@ -6,3 +6,6 @@ build
 
 # Ignore compiled binaries
 bin
+
+# Ignore JetBrains and their products
+.idea
